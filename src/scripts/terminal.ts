@@ -16,14 +16,16 @@ const BOOT_LINES = [
   '[  OK  ] Mounted /home/pozo/proyectos.',
   '[  OK  ] Loaded font Hack Nerd Font.',
   '[  OK  ] Started CSS Grid Layout Service.',
-  '[  OK  ] Reached target Graphical Interface.',
-  '[    1.904512] japozo.dev: v27 ready',
+  '[  OK  ] Started JavaScript Runtime.',
+  '[  OK  ] Reached target Creative Mode.',
+  '[    2.104512] japozo.dev: portfolio v27 ready',
 ];
 
 type Lang = 'es' | 'en';
 
 const TXT = {
   es: {
+    welcome: 'Bienvenido a <b>japozo.dev</b>. Escribe <span class="ok">help</span> para ver los comandos.',
     notFound: (c: string) => `zsh: comando no encontrado: ${c}`,
     help: [
       ['help', 'muestra esta ayuda'],
@@ -39,20 +41,23 @@ const TXT = {
       ['history · date · clear', 'lo de siempre'],
     ],
     whoami: 'pozo, desarrollador frontend en Gijón. Ex técnico de hardware, ahora picando código.',
-    bio: 'Hago webs rápidas, cuidadas y con carácter.',
+    readme:
+      'Construyo webs rápidas, cuidadas y con carácter.\nMás de 20 años de hardware me enseñaron a entender las cosas por dentro.\nAhora trabajo como frontend developer en @Kewo.',
     themes: 'Temas disponibles (usa: tema &lt;nombre&gt;):',
     themeSet: (t: string) => `Tema cambiado a <span class="ok">${t}</span>.`,
     themeBad: (t: string) => `tema: '${t}' no existe.`,
     cdBad: (t: string) => `cd: no existe el directorio: ${t}`,
+    going: (t: string) => `Navegando a ~/${t}...`,
     sudo: 'pozo no está en el archivo sudoers. Este incidente será reportado.',
     hire: '[sudo] contraseña para pozo: ********\n<span class="ok">Acceso concedido.</span> Me encanta la idea. Te llevo a contacto...',
     rm: 'Buen intento. Este sistema está protegido por café y copias de seguridad.',
-    neofetch: 'neofetch: descansa en paz. Prueba con <span class="ok">fastfetch</span>.',
     exit: 'No hay salida. Ya formas parte de japozo.dev.',
     opening: (t: string) => `Abriendo ${t}...`,
+    neofetch: 'neofetch: descansa en paz. Prueba con <span class="ok">fastfetch</span>.',
     langSwitch: 'Cambiando de idioma...',
   },
   en: {
+    welcome: 'Welcome to <b>japozo.dev</b>. Type <span class="ok">help</span> to list the commands.',
     notFound: (c: string) => `zsh: command not found: ${c}`,
     help: [
       ['help', 'show this help'],
@@ -68,90 +73,87 @@ const TXT = {
       ['history · date · clear', 'the usual'],
     ],
     whoami: 'pozo, frontend developer in Gijón, Spain. Former hardware tech, now writing code.',
-    bio: 'I build fast, polished websites with character.',
+    readme:
+      "I build fast, polished websites with character.\n20+ years of hardware taught me how things work under the hood.\nI'm currently a frontend developer at @Kewo.",
     themes: 'Available themes (use: theme &lt;name&gt;):',
     themeSet: (t: string) => `Theme switched to <span class="ok">${t}</span>.`,
     themeBad: (t: string) => `theme: '${t}' not found.`,
     cdBad: (t: string) => `cd: no such directory: ${t}`,
+    going: (t: string) => `Navigating to ~/${t}...`,
     sudo: 'pozo is not in the sudoers file. This incident will be reported.',
     hire: '[sudo] password for pozo: ********\n<span class="ok">Access granted.</span> Love the idea. Taking you to contact...',
     rm: 'Nice try. This system is protected by coffee and backups.',
-    neofetch: 'neofetch: rest in peace. Try <span class="ok">fastfetch</span>.',
     exit: 'There is no exit. You are part of japozo.dev now.',
     opening: (t: string) => `Opening ${t}...`,
+    neofetch: 'neofetch: rest in peace. Try <span class="ok">fastfetch</span>.',
     langSwitch: 'Switching language...',
   },
 };
 
 // alias de directorios -> id de sección
 const SECTIONS: Record<string, string> = {
-  '~': 'inicio',
   inicio: 'inicio',
   home: 'inicio',
+  '~': 'inicio',
   proyectos: 'proyectos',
   projects: 'proyectos',
   'sobre-mi': 'sobre-mi',
+  'sobre-mí': 'sobre-mi',
   about: 'sobre-mi',
   contacto: 'contacto',
   contact: 'contacto',
 };
 
 const COMMANDS = [
-  'help', 'whoami', 'fastfetch', 'ls', 'cat bio.txt', 'cd', 'email', 'github', 'linkedin',
-  'tema', 'theme', 'lang', 'history', 'date', 'clear', 'sudo hire-me', 'exit', 'echo',
+  'help', 'ayuda', 'whoami', 'fastfetch', 'ls', 'cat bio.txt', 'cd', 'email', 'github', 'linkedin',
+  'tema', 'theme', 'lang', 'history', 'date', 'clear', 'sudo hire-me', 'exit',
+  'proyectos', 'projects', 'contacto', 'contact', 'sobre-mi', 'about', 'echo',
 ];
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 const esc = (s: string) => s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
 
 export function initTerminal() {
-  const session = document.getElementById('session');
-  const log = document.getElementById('term-log');
+  const term = document.getElementById('term');
+  const out = document.getElementById('term-out');
   const form = document.getElementById('term-form') as HTMLFormElement | null;
   const input = document.getElementById('term-input') as HTMLInputElement | null;
-  const bootEl = document.getElementById('boot');
-  if (!session || !log || !form || !input || !bootEl) return;
+  if (!term || !out || !form || !input) return;
 
   const lang: Lang = document.documentElement.lang === 'en' ? 'en' : 'es';
   const T = TXT[lang];
   const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const steps = [...session.querySelectorAll<HTMLElement>(':scope > .step')];
   const history: string[] = [];
   let histIdx = 0;
+  let skipBoot = false;
+
+  const scrollDown = () => (term.scrollTop = term.scrollHeight);
 
   const print = (html: string, cls = '') => {
     const line = document.createElement('div');
     line.className = `line ${cls}`.trim();
     line.innerHTML = html;
-    log.appendChild(line);
+    out.appendChild(line);
+    scrollDown();
     return line;
   };
 
-  const ps1 = '<span class="ps1"><b>pozo@japozo</b> <i>~</i> $</span>';
+  const promptHtml = (cmd: string) =>
+    `<span class="prompt"><span class="seg seg--os">pozo</span><span class="seg seg--path">~</span><span class="seg-end"></span></span> ${esc(cmd)}`;
 
-  // fastfetch reutiliza el bloque renderizado en el servidor (sin el h1 ni el texto oculto)
+  // fastfetch: la salida se renderiza en el servidor dentro de <template id="ff-tpl">
   const fastfetch = () => {
-    const ff = document.getElementById('ff')!.cloneNode(true) as HTMLElement;
-    ff.removeAttribute('id');
-    const h1 = ff.querySelector('h1')!;
-    const logo = document.createElement('div');
-    logo.className = h1.className;
-    logo.appendChild(h1.querySelector('.ff__art')!);
-    h1.replaceWith(logo);
-    print('').appendChild(ff);
+    const tpl = document.getElementById('ff-tpl') as HTMLTemplateElement | null;
+    if (tpl) print('').appendChild(tpl.content.cloneNode(true));
   };
 
-  const goTo = (id: string) =>
+  const goTo = (id: string) => {
     document.getElementById(id)?.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth' });
-
-  const clear = () => {
-    log.innerHTML = '';
-    steps.forEach((s) => s !== form && (s.hidden = true));
   };
 
   const run = (raw: string) => {
     const cmdline = raw.trim();
-    print(`${ps1} ${esc(cmdline)}`, 'is-cmd');
+    print(promptHtml(cmdline));
     if (!cmdline) return;
     history.push(cmdline);
     histIdx = history.length;
@@ -159,6 +161,11 @@ export function initTerminal() {
     const [cmd, ...args] = cmdline.split(/\s+/);
     const arg = args.join(' ');
     const c = cmd.toLowerCase();
+
+    if (SECTIONS[c] && c !== '~') {
+      print(T.going(c), 'c-muted');
+      return goTo(SECTIONS[c]);
+    }
 
     switch (c) {
       case 'help':
@@ -171,14 +178,13 @@ export function initTerminal() {
       case 'neofetch':
         return print(T.neofetch);
       case 'ls':
-        return print(
-          [...document.querySelectorAll<HTMLAnchorElement>('.ls a')].map((a) => a.outerHTML).join('   ') + '   bio.txt',
-        );
+        return print(['proyectos', 'sobre-mi', 'contacto'].map((d) => `<a href="#${d}">${d}/</a>`).join('  ') + '  bio.txt');
       case 'cat':
-        return /^bio/.test(arg) ? print(T.bio) : print(`cat: ${esc(arg)}: No such file or directory`, 'c-danger');
+        return /^bio/.test(arg) ? print(T.readme) : print(`cat: ${esc(arg || '')}: No such file or directory`, 'c-danger');
       case 'cd': {
         const target = SECTIONS[arg.replace(/\/$/, '').toLowerCase() || '~'];
         if (!target) return print(T.cdBad(esc(arg)), 'c-danger');
+        print(T.going(esc(arg || '~')), 'c-muted');
         return goTo(target);
       }
       case 'email': {
@@ -196,15 +202,16 @@ export function initTerminal() {
       case 'theme': {
         if (!arg) {
           return print(
-            `${T.themes}\n` + THEMES.map((th) => `  ${th.id === currentTheme() ? '<span class="ok">*</span>' : ' '} ${th.id}`).join('\n'),
+            `${T.themes}\n` +
+              THEMES.map((th) => `  ${th.id === currentTheme() ? '<span class="ok">●</span>' : '○'} ${th.id}  <span class="c-muted">${th.label}</span>`).join('\n'),
           );
         }
         const id = arg.toLowerCase().split(/\s/)[0];
         return applyTheme(id) ? print(T.themeSet(id)) : print(T.themeBad(esc(id)), 'c-danger');
       }
-      case 'lang': {
-        const a = arg.toLowerCase();
-        const to = a === 'en' || a === 'es' ? a : lang === 'es' ? 'en' : 'es';
+      case 'lang':
+      case 'idioma': {
+        const to = arg.toLowerCase() === 'en' ? 'en' : arg.toLowerCase() === 'es' ? 'es' : lang === 'es' ? 'en' : 'es';
         if (to === lang) return;
         print(T.langSwitch, 'c-muted');
         setTimeout(() => (location.href = to === 'es' ? '/' : '/en/'), 300);
@@ -215,7 +222,8 @@ export function initTerminal() {
       case 'date':
         return print(new Date().toLocaleString(lang === 'es' ? 'es-ES' : 'en-GB', { dateStyle: 'full', timeStyle: 'medium' }));
       case 'clear':
-        return clear();
+        out.innerHTML = '';
+        return;
       case 'echo':
         return print(esc(arg));
       case 'sudo':
@@ -235,53 +243,68 @@ export function initTerminal() {
     }
   };
 
-  // --- arranque: solo la primera vez por sesión, ~2s, se salta con cualquier interacción ---
+  const typeAndRun = async (cmd: string, speed = 45) => {
+    if (reduceMotion) return run(cmd);
+    input.value = '';
+    for (const ch of cmd) {
+      input.value += ch;
+      await sleep(speed);
+    }
+    input.value = '';
+    run(cmd);
+  };
+
+  // --- arranque: rápido, no bloquea la página y se puede saltar ---
+  const finishBoot = () => {
+    delete term.dataset.booting;
+    try {
+      sessionStorage.setItem(BOOT_KEY, '1');
+    } catch {}
+  };
+
   const boot = async () => {
     let seen = false;
     try {
       seen = sessionStorage.getItem(BOOT_KEY) === '1';
-      sessionStorage.setItem(BOOT_KEY, '1');
     } catch {}
-    if (seen || reduceMotion) return bootEl.remove();
 
-    let skip = false;
-    const onSkip = () => (skip = true);
-    const skipEvents = ['pointerdown', 'keydown', 'wheel', 'touchstart'] as const;
-    skipEvents.forEach((e) => addEventListener(e, onSkip, { passive: true }));
+    if (!seen && !reduceMotion) {
+      out.setAttribute('aria-busy', 'true');
+      const skip = () => (skipBoot = true);
+      term.addEventListener('pointerdown', skip, { once: true });
+      document.addEventListener('keydown', skip, { once: true });
 
-    session.classList.add('is-booting');
-    for (const l of BOOT_LINES) {
-      if (skip) break;
-      const div = document.createElement('div');
-      div.innerHTML = esc(l).replace(/\[\s+OK\s+\]/, '[<span class="ok">  OK  </span>]');
-      bootEl.appendChild(div);
-      await sleep(30 + Math.random() * 40);
-    }
-    if (!skip) await sleep(150);
-    session.classList.remove('is-booting');
-    bootEl.remove();
-
-    // revela la sesión paso a paso, tecleando cada comando
-    steps.forEach((s) => s.classList.add('is-pending'));
-    for (const step of steps) {
-      const typed = step.querySelector<HTMLElement>('.typed');
-      const body = [...step.children].filter((c) => !c.classList.contains('cmd'));
-      step.classList.remove('is-pending');
-      if (!typed || skip) continue;
-      const text = typed.textContent ?? '';
-      body.forEach((b) => b.classList.add('is-pending'));
-      typed.textContent = '';
-      for (const ch of text) {
-        if (skip) break;
-        typed.textContent += ch;
-        await sleep(28);
+      for (const l of BOOT_LINES) {
+        if (skipBoot) break;
+        print(
+          esc(l)
+            .replace(/\[\s+OK\s+\]/, '[<span class="ok">  OK  </span>]')
+            .replace(/^\[\s*[\d.]+\]/, (m) => `<span class="ts">${m}</span>`),
+          'boot',
+        );
+        await sleep(40 + Math.random() * 60);
       }
-      typed.textContent = text;
-      if (!skip) await sleep(90);
-      body.forEach((b) => b.classList.remove('is-pending'));
-      if (!skip) await sleep(160);
+      if (!skipBoot) await sleep(250);
+      out.innerHTML = '';
+      out.removeAttribute('aria-busy');
     }
-    skipEvents.forEach((e) => removeEventListener(e, onSkip));
+
+    finishBoot();
+    print(promptHtml('fastfetch').replace(/ fastfetch$/, ' '), 'typing');
+    const typingLine = out.lastElementChild as HTMLElement;
+    if (!reduceMotion && !skipBoot && !seen) {
+      typingLine.innerHTML += '<span class="cursor"></span>';
+      for (const ch of 'fastfetch') {
+        await sleep(55);
+        typingLine.querySelector('.cursor')!.insertAdjacentText('beforebegin', ch);
+      }
+      await sleep(150);
+    }
+    typingLine.remove();
+    run('fastfetch');
+    history.length = 0;
+    histIdx = 0;
+    print(T.welcome);
   };
 
   // --- interacción ---
@@ -306,7 +329,7 @@ export function initTerminal() {
       if (!v) return;
       e.preventDefault();
       const [first, ...rest] = v.split(' ');
-      if (rest.length && ['cd', 'tema', 'theme'].includes(first)) {
+      if (rest.length && (first === 'cd' || first === 'tema' || first === 'theme')) {
         const pool = first === 'cd' ? Object.keys(SECTIONS) : THEMES.map((t) => t.id);
         const hit = pool.find((p) => p.startsWith(rest.join(' ')));
         if (hit) input.value = `${first} ${hit}`;
@@ -316,9 +339,22 @@ export function initTerminal() {
       }
     } else if (e.key === 'l' && e.ctrlKey) {
       e.preventDefault();
-      clear();
+      out.innerHTML = '';
     }
   });
 
-  boot();
+  // click en la terminal = foco al input (sin robar la selección de texto)
+  term.addEventListener('click', () => {
+    if (!getSelection()?.toString()) input.focus({ preventScroll: true });
+  });
+
+  document.querySelectorAll<HTMLButtonElement>('.chip[data-cmd]').forEach((chip) =>
+    chip.addEventListener('click', async () => {
+      skipBoot = true;
+      await booted;
+      typeAndRun(chip.dataset.cmd!, 35);
+    }),
+  );
+
+  const booted = boot();
 }
