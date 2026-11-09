@@ -17,7 +17,7 @@ const { cmd, path, title, lead, index } = Astro.props;
     <span class="sh__typed" style={`--n:${cmd.length}`}>{cmd}</span>
   </p>
   <h2 class="sh__title"><span class="sh__index" aria-hidden="true">{index}.</span>{title}</h2>
-  {lead && <p class="sh__lead">{lead}</p>}
+  {lead && <p class="sh__lead prose">{lead}</p>}
 </header>
 
 <style>

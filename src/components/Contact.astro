@@ -3,7 +3,6 @@ import type { Lang } from '../data/site';
 import { SOCIAL } from '../data/site';
 import { useTranslations } from '../i18n/ui';
 import SectionHeading from './SectionHeading.astro';
-import Window from './Window.astro';
 
 interface Props {
   lang: Lang;
@@ -19,8 +18,7 @@ const short = (url: string) => url.replace(/^https:\/\/(www\.)?/, '').replace(/\
     <SectionHeading index="03" path="~/contacto" cmd="./contacto.sh" title={t.contact.title} lead={t.contact.lead} />
 
     <div class="reveal">
-      <Window title="contacto.sh — zsh" icon={''}>
-        <div class="contact__body">
+      <div class="contact__body">
           <dl class="rows">
             <div class="row">
               <dt><span aria-hidden="true">{''}</span> {t.contact.email}</dt>
@@ -45,15 +43,15 @@ const short = (url: string) => url.replace(/^https:\/\/(www\.)?/, '').replace(/\
             </div>
           </dl>
           <p class="toast" id="copy-toast" role="status" aria-live="polite"></p>
-        </div>
-      </Window>
+      </div>
     </div>
   </div>
 </section>
 
 <style>
   .contact__body {
-    padding: clamp(1.25rem, 3vw, 2rem);
+    border-top: 1px solid var(--border);
+    padding-top: 1.5rem;
   }
   .rows {
     display: grid;

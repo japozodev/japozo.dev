@@ -17,7 +17,7 @@ const num = String(index + 1).padStart(2, '0');
 ---
 
 <article class:list={['card reveal', { 'card--queued': queued }]} style={`--delay:${index * 80}ms`}>
-  <Window title={project.domain ?? `~/proyectos/${project.slug}`} icon={queued ? '' : ''}>
+  <Window title={project.domain ?? `~/proyectos/${project.slug}`}>
     <div class="card__media">
       {
         project.image ? (
@@ -59,7 +59,7 @@ const num = String(index + 1).padStart(2, '0');
         )
       }
     </h3>
-    <p class="card__desc">{project.desc[lang]}</p>
+    <p class="card__desc prose">{project.desc[lang]}</p>
     <dl class="card__meta">
       <div><dt>{t.projects.role}</dt><dd>{project.role[lang]}</dd></div>
       <div>
@@ -86,12 +86,15 @@ const num = String(index + 1).padStart(2, '0');
     transition-delay: var(--delay);
   }
   .card :global(.window) {
-    transition: transform 0.4s cubic-bezier(0.2, 0.7, 0.2, 1), border-color 0.3s, box-shadow 0.4s;
+    transition: transform 0.4s cubic-bezier(0.2, 0.7, 0.2, 1);
   }
   .card:hover :global(.window) {
-    transform: translateY(-6px);
-    border-color: color-mix(in srgb, var(--accent) 60%, var(--border));
-    box-shadow: 0 30px 60px -25px var(--glow);
+    transform: translateY(-4px);
+  }
+  /* toda la tarjeta activa la ventana, como el foco en Hyprland */
+  .card:hover :global(.window)::before,
+  .card:focus-within :global(.window)::before {
+    opacity: 1;
   }
   .card__media {
     aspect-ratio: 16 / 10;
@@ -141,6 +144,9 @@ const num = String(index + 1).padStart(2, '0');
   }
   .card--queued :global(.window) {
     border-style: dashed;
+  }
+  .card--queued:hover :global(.window)::before {
+    opacity: 0;
   }
   .card__body {
     display: grid;

@@ -5,7 +5,6 @@ import { STACK, TIMELINE } from '../data/site';
 import { useTranslations } from '../i18n/ui';
 import profile from '../assets/profile.jpg';
 import SectionHeading from './SectionHeading.astro';
-import Window from './Window.astro';
 
 interface Props {
   lang: Lang;
@@ -21,14 +20,12 @@ const t = useTranslations(lang);
 
     <div class="about__grid">
       <div class="about__photo reveal">
-        <Window title="pozo.jpg" icon={''}>
-          <div class="photo">
+        <div class="photo">
             <Image src={profile} alt={t.about.photoAlt} widths={[300, 460]} sizes="(max-width: 760px) 80vw, 340px" format="webp" />
-          </div>
-        </Window>
+        </div>
       </div>
 
-      <div class="about__text reveal">
+      <div class="about__text prose reveal">
         <p class="about__p1">{t.about.p1}</p>
         <p>{t.about.p2}</p>
       </div>
@@ -99,19 +96,19 @@ const t = useTranslations(lang);
     grid-area: log;
   }
   .about__panel {
-    padding: 1.25rem 1.4rem;
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    background: var(--bg-alt);
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--border);
     font-size: 0.85rem;
   }
   .panel__cmd {
-    margin: 0 0 0.9rem;
+    margin: 0 0 1rem;
   }
 
   .photo {
     position: relative;
     aspect-ratio: 1;
+    overflow: hidden;
+    border-radius: var(--radius);
     background: var(--accent);
   }
   .photo :global(img) {

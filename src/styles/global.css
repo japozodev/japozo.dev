@@ -40,6 +40,42 @@
   --magenta: #b07fd6;
   --glow: rgb(53 191 92 / 0.35);
 }
+[data-theme='dracula'] {
+  color-scheme: dark;
+  --bg: #1e1f29;
+  --bg-alt: #21222c;
+  --surface: #282a36;
+  --surface-2: #343746;
+  --border: #44475a;
+  --fg: #f8f8f2;
+  --muted: #8b93c4;
+  --accent: #bd93f9;
+  --accent-2: #ff79c6;
+  --accent-ink: #1e1f29;
+  --info: #8be9fd;
+  --warn: #ffb86c;
+  --danger: #ff5555;
+  --magenta: #ff79c6;
+  --glow: rgb(189 147 249 / 0.3);
+}
+[data-theme='cyberpunk'] {
+  color-scheme: dark;
+  --bg: #08080f;
+  --bg-alt: #0d0d18;
+  --surface: #131322;
+  --surface-2: #1c1c30;
+  --border: #2a2a44;
+  --fg: #e6edf3;
+  --muted: #8a90b0;
+  --accent: #fcee0a;
+  --accent-2: #00f0ff;
+  --accent-ink: #08080f;
+  --info: #00f0ff;
+  --warn: #ff9f1c;
+  --danger: #ff2a6d;
+  --magenta: #ff2a6d;
+  --glow: rgb(252 238 10 / 0.25);
+}
 [data-theme='tokyo'] {
   color-scheme: dark;
   --bg: #13141c;
@@ -97,7 +133,9 @@
 
 /* ---------- BASE ---------- */
 :root {
+  /* Hack: terminal, prompts y UI. Fira Code: titulares y texto editorial */
   --font: 'Hack Nerd Font', 'Hack', ui-monospace, 'Cascadia Code', Consolas, monospace;
+  --font-display: 'Fira Code Variable', 'Fira Code', var(--font);
   --radius: 10px;
   --gutter: clamp(1rem, 4vw, 2.5rem);
   --max: 1200px;
@@ -153,9 +191,15 @@ a {
 h1,
 h2,
 h3 {
+  font-family: var(--font-display);
   line-height: 1.15;
   margin: 0;
   text-wrap: balance;
+}
+
+.prose {
+  font-family: var(--font-display);
+  font-weight: 400;
 }
 
 p {

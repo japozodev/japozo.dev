@@ -67,7 +67,7 @@ export const ui = {
       location: 'ubicación',
       locationValue: 'Gijón, Asturias · remoto',
     },
-    footer: { made: 'Hecho a mano con Astro y Hack Nerd Font' },
+    footer: { made: 'Hecho a mano con Astro, Hack Nerd Font y Fira Code' },
   },
   en: {
     meta: {
@@ -133,7 +133,7 @@ export const ui = {
       location: 'location',
       locationValue: 'Gijón, Spain · remote',
     },
-    footer: { made: 'Handmade with Astro and Hack Nerd Font' },
+    footer: { made: 'Handmade with Astro, Hack Nerd Font and Fira Code' },
   },
 } as const;
 

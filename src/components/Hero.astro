@@ -2,6 +2,7 @@
 import type { Lang } from '../data/site';
 import { useTranslations } from '../i18n/ui';
 import Terminal from './Terminal.astro';
+import { BG_LOG } from '../data/bglog';
 
 interface Props {
   lang: Lang;
@@ -9,10 +10,14 @@ interface Props {
 
 const { lang } = Astro.props;
 const t = useTranslations(lang);
+// duplicado para que el desplazamiento en bucle no tenga salto
+const bgLog = [...BG_LOG, ...BG_LOG].join('\n');
 ---
 
 <section id="inicio" class="hero">
-  <div class="hero__bg" aria-hidden="true"></div>
+  <div class="hero__bg" aria-hidden="true">
+    <pre class="hero__log">{bgLog}</pre>
+  </div>
   <div class="container hero__grid">
     <div class="hero__copy">
       <p class="hero__kicker"><span class="dot"></span>{t.hero.kicker}</p>
@@ -25,7 +30,7 @@ const t = useTranslations(lang);
         <span class="sr-only">{t.hero.roles[0]}</span>
         <span id="role-rotator" aria-hidden="true" data-roles={JSON.stringify(t.hero.roles)}>{t.hero.roles[0]}</span>
       </p>
-      <p class="hero__lead">{t.hero.lead}</p>
+      <p class="hero__lead prose">{t.hero.lead}</p>
       <div class="hero__cta">
         <a href="#proyectos" class="btn btn--primary"><span aria-hidden="true">{''}</span>{t.hero.ctaProjects}</a>
         <a href="#contacto" class="btn btn--ghost"><span aria-hidden="true">{''}</span>{t.hero.ctaContact}</a>
@@ -45,19 +50,31 @@ const t = useTranslations(lang);
     padding-block: clamp(2.5rem, 6vw, 4rem);
     isolation: isolate;
   }
-  /* rejilla + resplandor */
+  /* log de sistema casi invisible que sube muy despacio */
   .hero__bg {
     position: absolute;
     inset: 0;
     z-index: -1;
-    background:
-      radial-gradient(60% 50% at 75% 40%, var(--glow), transparent 70%),
-      radial-gradient(40% 40% at 10% 90%, color-mix(in srgb, var(--accent-2) 18%, transparent), transparent 70%),
-      linear-gradient(color-mix(in srgb, var(--border) 45%, transparent) 1px, transparent 1px) 0 0 / 40px 40px,
-      linear-gradient(90deg, color-mix(in srgb, var(--border) 45%, transparent) 1px, transparent 1px) 0 0 / 40px 40px;
-    mask-image: radial-gradient(ellipse 90% 80% at 50% 40%, #000 40%, transparent 100%);
-    -webkit-mask-image: radial-gradient(ellipse 90% 80% at 50% 40%, #000 40%, transparent 100%);
-    opacity: 0.9;
+    left: 48%;
+    overflow: hidden;
+    mask-image: linear-gradient(transparent, #000 25%, #000 75%, transparent);
+    -webkit-mask-image: linear-gradient(transparent, #000 25%, #000 75%, transparent);
+  }
+  .hero__log {
+    margin: 0;
+    padding-inline: var(--gutter);
+    font: inherit;
+    font-size: 0.8rem;
+    line-height: 1.9;
+    white-space: pre;
+    color: var(--fg);
+    opacity: 0.08;
+    animation: log-scroll 140s linear infinite;
+  }
+  @keyframes log-scroll {
+    to {
+      transform: translateY(-50%);
+    }
   }
   .hero__grid {
     display: grid;
@@ -155,6 +172,14 @@ const t = useTranslations(lang);
   @media (max-width: 960px) {
     .hero {
       min-height: auto;
+    }
+    /* en una columna el log queda detrás de la terminal */
+    .hero__bg {
+      left: 0;
+      top: 40%;
+    }
+    .hero__log {
+      opacity: 0.06;
     }
     .hero__grid {
       grid-template-columns: minmax(0, 1fr);
