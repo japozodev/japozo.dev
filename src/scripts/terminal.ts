@@ -2,6 +2,9 @@ import { SOCIAL } from '../data/site';
 import { THEMES } from '../data/themes';
 import { applyTheme, currentTheme } from './theme';
 import { getEmail } from './email';
+import { goToSection } from './workspaces';
+import { cava, cmatrix } from './effects';
+import { hyprctl } from './hyprctl';
 
 const BOOT_KEY = 'japozo-booted';
 
@@ -15,7 +18,7 @@ const BOOT_LINES = [
   '[  OK  ] Started Network Manager.',
   '[  OK  ] Mounted /home/pozo/proyectos.',
   '[  OK  ] Loaded font Hack Nerd Font.',
-  '[  OK  ] Started CSS Grid Layout Service.',
+  '[  OK  ] Started Hyprland compositor.',
   '[  OK  ] Started JavaScript Runtime.',
   '[  OK  ] Reached target Creative Mode.',
   '[    2.104512] japozo.dev: portfolio v27 ready',
@@ -26,17 +29,18 @@ type Lang = 'es' | 'en';
 const TXT = {
   es: {
     welcome: 'Bienvenido a <b>japozo.dev</b>. Escribe <span class="ok">help</span> para ver los comandos.',
+    kittyWelcome: 'Nueva ventana de kitty. Escribe <span class="ok">exit</span> para cerrarla.',
     notFound: (c: string) => `zsh: comando no encontrado: ${c}`,
     help: [
       ['help', 'muestra esta ayuda'],
-      ['whoami', 'quién soy'],
-      ['fastfetch', 'info del sistema'],
-      ['ls', 'lista el contenido'],
-      ['cat bio.txt', 'presentación corta'],
+      ['whoami · fastfetch', 'quién soy'],
+      ['ls · cat bio.txt', 'lista el contenido y lee la bio'],
       ['cd <sección>', 'ir a proyectos, sobre-mi, contacto'],
-      ['email', 'muestra mi email'],
-      ['github · linkedin', 'abre mis perfiles'],
+      ['email · github · linkedin', 'contacto'],
       ['tema [nombre]', 'cambia el tema de colores'],
+      ['kitty', 'abre otra terminal en el mosaico'],
+      ['cmatrix · cava', 'efectos (cualquier tecla para salir)'],
+      ['hyprctl', 'ajusta el escritorio en vivo'],
       ['lang en', 'switch to English'],
       ['history · date · clear', 'lo de siempre'],
     ],
@@ -47,28 +51,31 @@ const TXT = {
     themeSet: (t: string) => `Tema cambiado a <span class="ok">${t}</span>.`,
     themeBad: (t: string) => `tema: '${t}' no existe.`,
     cdBad: (t: string) => `cd: no existe el directorio: ${t}`,
-    going: (t: string) => `Navegando a ~/${t}...`,
+    going: (t: string) => `Cambiando al workspace ~/${t}...`,
     sudo: 'pozo no está en el archivo sudoers. Este incidente será reportado.',
     hire: '[sudo] contraseña para pozo: ********\n<span class="ok">Acceso concedido.</span> Me encanta la idea. Te llevo a contacto...',
     rm: 'Buen intento. Este sistema está protegido por café y copias de seguridad.',
-    exit: 'No hay salida. Ya formas parte de japozo.dev.',
+    exit: 'Esta es la terminal principal, no se puede cerrar. Prueba en una <span class="ok">kitty</span>.',
     opening: (t: string) => `Abriendo ${t}...`,
     neofetch: 'neofetch: descansa en paz. Prueba con <span class="ok">fastfetch</span>.',
     langSwitch: 'Cambiando de idioma...',
+    kittyFull: 'hyprland: workspace lleno. Cierra una ventana con <span class="ok">exit</span>.',
+    kittyOpen: 'Abriendo kitty...',
   },
   en: {
     welcome: 'Welcome to <b>japozo.dev</b>. Type <span class="ok">help</span> to list the commands.',
+    kittyWelcome: 'New kitty window. Type <span class="ok">exit</span> to close it.',
     notFound: (c: string) => `zsh: command not found: ${c}`,
     help: [
       ['help', 'show this help'],
-      ['whoami', 'who I am'],
-      ['fastfetch', 'system info'],
-      ['ls', 'list contents'],
-      ['cat bio.txt', 'short intro'],
+      ['whoami · fastfetch', 'who I am'],
+      ['ls · cat bio.txt', 'list contents and read the bio'],
       ['cd <section>', 'go to projects, about, contact'],
-      ['email', 'show my email'],
-      ['github · linkedin', 'open my profiles'],
+      ['email · github · linkedin', 'contact'],
       ['theme [name]', 'change the colour theme'],
+      ['kitty', 'open another terminal in the tiling'],
+      ['cmatrix · cava', 'effects (any key to quit)'],
+      ['hyprctl', 'tweak the desktop live'],
       ['lang es', 'cambiar a español'],
       ['history · date · clear', 'the usual'],
     ],
@@ -79,14 +86,16 @@ const TXT = {
     themeSet: (t: string) => `Theme switched to <span class="ok">${t}</span>.`,
     themeBad: (t: string) => `theme: '${t}' not found.`,
     cdBad: (t: string) => `cd: no such directory: ${t}`,
-    going: (t: string) => `Navigating to ~/${t}...`,
+    going: (t: string) => `Switching to workspace ~/${t}...`,
     sudo: 'pozo is not in the sudoers file. This incident will be reported.',
     hire: '[sudo] password for pozo: ********\n<span class="ok">Access granted.</span> Love the idea. Taking you to contact...',
     rm: 'Nice try. This system is protected by coffee and backups.',
-    exit: 'There is no exit. You are part of japozo.dev now.',
+    exit: "This is the main terminal, it can't be closed. Try it in a <span class=\"ok\">kitty</span>.",
     opening: (t: string) => `Opening ${t}...`,
     neofetch: 'neofetch: rest in peace. Try <span class="ok">fastfetch</span>.',
     langSwitch: 'Switching language...',
+    kittyFull: 'hyprland: workspace is full. Close a window with <span class="ok">exit</span>.',
+    kittyOpen: 'Opening kitty...',
   },
 };
 
@@ -105,20 +114,35 @@ const SECTIONS: Record<string, string> = {
 };
 
 const COMMANDS = [
-  'help', 'ayuda', 'whoami', 'fastfetch', 'ls', 'cat bio.txt', 'cd', 'email', 'github', 'linkedin',
-  'tema', 'theme', 'lang', 'history', 'date', 'clear', 'sudo hire-me', 'exit',
-  'proyectos', 'projects', 'contacto', 'contact', 'sobre-mi', 'about', 'echo',
+  'help', 'whoami', 'fastfetch', 'ls', 'cat bio.txt', 'cd', 'email', 'github', 'linkedin',
+  'tema', 'theme', 'kitty', 'cmatrix', 'cava', 'hyprctl', 'lang', 'history', 'date', 'clear',
+  'sudo hire-me', 'exit', 'proyectos', 'projects', 'contacto', 'contact', 'sobre-mi', 'about', 'echo',
 ];
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
-const esc = (s: string) => s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
+export const esc = (s: string) => s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
 
-export function initTerminal() {
-  const term = document.getElementById('term');
-  const out = document.getElementById('term-out');
-  const form = document.getElementById('term-form') as HTMLFormElement | null;
-  const input = document.getElementById('term-input') as HTMLInputElement | null;
-  if (!term || !out || !form || !input) return;
+export interface TerminalOptions {
+  boot?: boolean;
+  /** abre una kitty nueva; devuelve false si no cabe */
+  spawn?: () => boolean;
+  /** cierra esta ventana (solo en kitties) */
+  close?: () => void;
+}
+
+export interface TerminalApi {
+  run: (cmd: string) => void;
+  typeAndRun: (cmd: string, speed?: number) => Promise<void>;
+  ready: Promise<void>;
+  focus: () => void;
+}
+
+export function createTerminal(root: HTMLElement, opts: TerminalOptions = {}): TerminalApi | null {
+  const term = root.querySelector<HTMLElement>('.term');
+  const out = root.querySelector<HTMLElement>('.term__out');
+  const form = root.querySelector<HTMLFormElement>('.term__line');
+  const input = root.querySelector<HTMLInputElement>('.term__input');
+  if (!term || !out || !form || !input) return null;
 
   const lang: Lang = document.documentElement.lang === 'en' ? 'en' : 'es';
   const T = TXT[lang];
@@ -126,6 +150,8 @@ export function initTerminal() {
   const history: string[] = [];
   let histIdx = 0;
   let skipBoot = false;
+  // efecto a pantalla completa en curso (cmatrix, cava); se para con cualquier tecla
+  let stopEffect: (() => void) | null = null;
 
   const scrollDown = () => (term.scrollTop = term.scrollHeight);
 
@@ -147,9 +173,7 @@ export function initTerminal() {
     if (tpl) print('').appendChild(tpl.content.cloneNode(true));
   };
 
-  const goTo = (id: string) => {
-    document.getElementById(id)?.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth' });
-  };
+  const goTo = (id: string) => goToSection(id);
 
   const run = (raw: string) => {
     const cmdline = raw.trim();
@@ -209,6 +233,22 @@ export function initTerminal() {
         const id = arg.toLowerCase().split(/\s/)[0];
         return applyTheme(id) ? print(T.themeSet(id)) : print(T.themeBad(esc(id)), 'c-danger');
       }
+      case 'kitty':
+      case 'alacritty':
+      case 'foot': {
+        if (!opts.spawn) return print(T.notFound(esc(cmd)), 'c-danger');
+        print(T.kittyOpen, 'c-muted');
+        if (!opts.spawn()) print(T.kittyFull, 'c-warn');
+        return;
+      }
+      case 'cmatrix':
+        stopEffect = cmatrix(term);
+        return;
+      case 'cava':
+        stopEffect = cava(term);
+        return;
+      case 'hyprctl':
+        return print(hyprctl(args, lang));
       case 'lang':
       case 'idioma': {
         const to = arg.toLowerCase() === 'en' ? 'en' : arg.toLowerCase() === 'es' ? 'es' : lang === 'es' ? 'en' : 'es';
@@ -237,6 +277,7 @@ export function initTerminal() {
         return print(T.rm, 'c-warn');
       case 'exit':
       case 'logout':
+        if (opts.close) return opts.close();
         return print(T.exit, 'c-magenta');
       default:
         return print(T.notFound(esc(cmd)), 'c-danger');
@@ -255,13 +296,6 @@ export function initTerminal() {
   };
 
   // --- arranque: rápido, no bloquea la página y se puede saltar ---
-  const finishBoot = () => {
-    delete term.dataset.booting;
-    try {
-      sessionStorage.setItem(BOOT_KEY, '1');
-    } catch {}
-  };
-
   const boot = async () => {
     let seen = false;
     try {
@@ -269,6 +303,7 @@ export function initTerminal() {
     } catch {}
 
     if (!seen && !reduceMotion) {
+      term.dataset.booting = '';
       out.setAttribute('aria-busy', 'true');
       const skip = () => (skipBoot = true);
       term.addEventListener('pointerdown', skip, { once: true });
@@ -289,7 +324,11 @@ export function initTerminal() {
       out.removeAttribute('aria-busy');
     }
 
-    finishBoot();
+    delete term.dataset.booting;
+    try {
+      sessionStorage.setItem(BOOT_KEY, '1');
+    } catch {}
+
     print(promptHtml('fastfetch').replace(/ fastfetch$/, ' '), 'typing');
     const typingLine = out.lastElementChild as HTMLElement;
     if (!reduceMotion && !skipBoot && !seen) {
@@ -316,6 +355,12 @@ export function initTerminal() {
   });
 
   input.addEventListener('keydown', (e) => {
+    if (stopEffect) {
+      e.preventDefault();
+      stopEffect();
+      stopEffect = null;
+      return;
+    }
     if (e.key === 'ArrowUp' && history.length) {
       e.preventDefault();
       histIdx = Math.max(0, histIdx - 1);
@@ -343,18 +388,31 @@ export function initTerminal() {
     }
   });
 
-  // click en la terminal = foco al input (sin robar la selección de texto)
+  // click en la terminal = foco al input (sin robar la selección de texto); también corta efectos
   term.addEventListener('click', () => {
+    if (stopEffect) {
+      stopEffect();
+      stopEffect = null;
+    }
     if (!getSelection()?.toString()) input.focus({ preventScroll: true });
   });
 
-  document.querySelectorAll<HTMLButtonElement>('.chip[data-cmd]').forEach((chip) =>
-    chip.addEventListener('click', async () => {
-      skipBoot = true;
-      await booted;
-      typeAndRun(chip.dataset.cmd!, 35);
-    }),
-  );
+  let ready: Promise<void>;
+  if (opts.boot) {
+    ready = boot();
+  } else {
+    print(T.kittyWelcome);
+    ready = Promise.resolve();
+  }
 
-  const booted = boot();
+  return {
+    run,
+    async typeAndRun(cmd, speed = 35) {
+      skipBoot = true;
+      await ready;
+      return typeAndRun(cmd, speed);
+    },
+    ready,
+    focus: () => input.focus({ preventScroll: true }),
+  };
 }

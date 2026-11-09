@@ -1,103 +1,64 @@
 ---
+// Ventana de terminal (kitty). La principal arranca con boot; las demás se clonan desde
+// <template id="kitty-tpl"> cuando alguien escribe `kitty`.
 import type { Lang } from '../data/site';
 import { useTranslations } from '../i18n/ui';
 import Window from './Window.astro';
-import { SITE } from '../data/site';
-import { LOGO } from '../data/logo';
 
 interface Props {
   lang: Lang;
+  kitty?: boolean;
 }
 
-const { lang } = Astro.props;
+const { lang, kitty = false } = Astro.props;
 const t = useTranslations(lang);
-const chips = lang === 'es' ? ['help', 'fastfetch', 'proyectos', 'tema', 'sudo hire-me'] : ['help', 'fastfetch', 'projects', 'theme', 'sudo hire-me'];
-const now = new Date();
-const age = now.getFullYear() - SITE.birth.year - (now.getMonth() + 1 < SITE.birth.month ? 1 : 0);
 ---
 
-<div class="terminal-wrap">
-  <Window title={t.terminal.title} class="terminal">
-    <div class="term" id="term" data-booting>
-      <div class="term__out" id="term-out" role="log" aria-live="polite"></div>
-      <form class="term__line" id="term-form" autocomplete="off">
-        <span class="prompt" aria-hidden="true">
-          <span class="seg seg--os">pozo</span><span class="seg seg--path">~</span><span class="seg-end">{''}</span>
-        </span>
-        <label for="term-input" class="sr-only">{t.terminal.inputLabel}</label>
-        <input
-          id="term-input"
-          class="term__input"
-          type="text"
-          spellcheck="false"
-          autocapitalize="off"
-          autocomplete="off"
-          enterkeyhint="send"
-        />
-      </form>
-      <span class="term__skip" aria-hidden="true">{t.terminal.skip}</span>
-    </div>
-    <template id="ff-tpl">
-      <div class="ff">
-        <pre class="ff__logo" aria-hidden="true">{LOGO}</pre>
-        <div class="ff__info">
-          <div><span class="ff__key">pozo</span>@<span class="ff__key">japozo.dev</span></div>
-          <div class="c-muted">{'-'.repeat(15)}</div>
-          {t.terminal.ff.map(([k, v]) => <div><span class="ff__key">{k}</span>: {v}</div>)}
-          <div><span class="ff__key">{t.terminal.uptime}</span>: {age} {t.terminal.years}</div>
-          <div class="palette" aria-hidden="true">
-            {['fg', 'danger', 'accent', 'warn', 'info', 'magenta', 'accent-2', 'muted'].map((c) => <span style={`background:var(--${c})`} />)}
-          </div>
-        </div>
-      </div>
-    </template>
-  </Window>
-
-  <div class="chips" aria-label={t.terminal.hint}>
-    <span class="chips__label">{t.terminal.hint}</span>
-    {chips.map((c) => <button type="button" class="chip" data-cmd={c}>{c}</button>)}
+<Window title={kitty ? 'kitty: ~' : t.terminal.title} class:list={['tile', 'terminal', kitty ? 'tile--kitty' : 'tile--main']}>
+  <div class="term">
+    <div class="term__out" role="log" aria-live="polite"></div>
+    <form class="term__line" autocomplete="off">
+      <label class="prompt">
+        <span aria-hidden="true"><span class="seg seg--os">pozo</span><span class="seg seg--path">~</span><span class="seg-end">{'\ue0b0'}</span></span>
+        <span class="sr-only">{t.terminal.inputLabel}</span>
+        <input class="term__input" type="text" spellcheck="false" autocapitalize="off" autocomplete="off" enterkeyhint="send" />
+      </label>
+    </form>
+    {!kitty && <span class="term__skip" aria-hidden="true">{t.terminal.skip}</span>}
   </div>
-</div>
+</Window>
 
 <style>
-  .terminal-wrap {
-    display: grid;
-    gap: 0.9rem;
-    min-width: 0;
-  }
-  /* ventana inactiva al 70% con blur, como en Hyprland: opaca al pasar el ratón o al escribir */
-  .terminal-wrap :global(.window),
-  .terminal-wrap :global(.window__bar) {
-    transition: background-color 0.35s ease;
-  }
-  .terminal-wrap :global(.window) {
-    background: color-mix(in srgb, var(--bg-alt) 70%, transparent);
+  /* ventana inactiva translúcida con blur, como en Hyprland: opaca al pasar el ratón o al escribir */
+  /* .tile.terminal para ganar en especificidad a .window */
+  .tile.terminal {
+    position: relative;
+    background: color-mix(in srgb, var(--bg-alt) var(--inactive-alpha), transparent);
     backdrop-filter: blur(14px) saturate(1.3);
     -webkit-backdrop-filter: blur(14px) saturate(1.3);
+    box-shadow: 0 24px 60px -24px rgb(0 0 0 / 0.6);
+    transition: background-color 0.35s ease;
   }
-  .terminal-wrap :global(.window__bar) {
-    background: color-mix(in srgb, var(--surface) 70%, transparent);
+  .tile.terminal :global(.window__bar) {
+    background: color-mix(in srgb, var(--surface) var(--inactive-alpha), transparent);
+    transition: background-color 0.35s ease;
   }
-  .terminal-wrap:hover :global(.window),
-  .terminal-wrap:focus-within :global(.window) {
+  .tile.terminal:hover,
+  .tile.terminal:focus-within {
     background: var(--bg-alt);
   }
-  .terminal-wrap:hover :global(.window__bar),
-  .terminal-wrap:focus-within :global(.window__bar) {
+  .tile.terminal:hover :global(.window__bar),
+  .tile.terminal:focus-within :global(.window__bar) {
     background: var(--surface);
-  }
-  .terminal {
-    position: relative;
-    box-shadow: 0 24px 60px -24px rgb(0 0 0 / 0.6);
   }
   .term {
     position: relative;
     container-type: inline-size;
-    height: clamp(21rem, 52vh, 30rem);
+    height: clamp(17rem, 47vh, 27.5rem);
     overflow-y: auto;
     padding: 1rem 1.1rem 1.2rem;
-    font-size: clamp(0.72rem, 0.68rem + 0.25vw, 0.85rem);
-    line-height: 1.55;
+    font-size: clamp(0.72rem, 0.68rem + 0.2vw, 0.82rem);
+    line-height: 1.45;
     cursor: text;
     scrollbar-width: thin;
     scrollbar-color: var(--border) transparent;
@@ -125,15 +86,16 @@ const age = now.getFullYear() - SITE.birth.year - (now.getMonth() + 1 < SITE.bir
     text-overflow: ellipsis;
   }
   .term__line {
+    margin-top: 0.25rem;
+  }
+  .term .term__line .prompt {
     display: flex;
     align-items: center;
     gap: 0.6rem;
-    margin-top: 0.25rem;
   }
   [data-booting] .term__line {
     visibility: hidden;
   }
-  .prompt,
   .term :global(.prompt) {
     display: inline-flex;
     flex-shrink: 0;
@@ -152,6 +114,18 @@ const age = now.getFullYear() - SITE.birth.year - (now.getMonth() + 1 < SITE.bir
   }
   .term :global(.seg-end) {
     color: var(--surface-2);
+  }
+  /* kitty: ocupa el alto de su celda del mosaico */
+  .tile--kitty .term {
+    height: 100%;
+    min-height: 12rem;
+  }
+  :global(.term-fx) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
   }
   .term__input {
     flex: 1;
@@ -194,14 +168,14 @@ const age = now.getFullYear() - SITE.birth.year - (now.getMonth() + 1 < SITE.bir
   }
   .term :global(.ff) {
     display: grid;
-    gap: 0.9rem;
-    margin-block: 0.4rem 0.8rem;
+    gap: 0.6rem;
+    margin-block: 0.3rem 0.6rem;
   }
   .term :global(.ff__logo) {
     margin: 0;
     font: inherit;
     /* 47 columnas de logo: se ajusta al ancho de la terminal */
-    font-size: min(1.15em, calc((100cqi - 0.5rem) / 47 / 0.602));
+    font-size: min(1em, calc((100cqi - 0.5rem) / 47 / 0.602));
     line-height: 1.2;
     color: var(--accent);
     /* tapa las juntas de antialiasing entre bloques */
@@ -230,45 +204,9 @@ const age = now.getFullYear() - SITE.birth.year - (now.getMonth() + 1 < SITE.bir
     column-gap: 2ch;
   }
 
-  .chips {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.45rem;
-    font-size: 0.8rem;
-  }
-  .chips__label {
-    color: var(--muted);
-  }
-  .chip {
-    padding: 0.3rem 0.7rem;
-    border: 1px dashed var(--border);
-    border-radius: 999px;
-    background: none;
-    color: var(--fg);
-    font: inherit;
-    cursor: pointer;
-    transition: border-color 0.2s, color 0.2s, background-color 0.2s;
-  }
-  .chip::before {
-    content: '$ ';
-    color: var(--accent);
-  }
-  .chip:hover {
-    border-style: solid;
-    border-color: var(--accent);
-    background: color-mix(in srgb, var(--accent) 10%, transparent);
-  }
-
-
   @keyframes blink {
     50% {
       opacity: 0;
     }
   }
 </style>
-
-<script>
-  import { initTerminal } from '../scripts/terminal';
-  initTerminal();
-</script>

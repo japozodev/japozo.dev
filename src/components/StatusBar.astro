@@ -24,7 +24,7 @@ const windows = [
       windows.map((w, i) => (
         <li>
           <a href={`#${w.id}`} data-section={w.id} aria-current={i === 0 ? 'true' : undefined}>
-            <span class="tmux__n">{i}:</span>
+            <span class="tmux__n">{i + 1}:</span>
             <span class="tmux__label">{w.label}</span>
           </a>
         </li>
@@ -129,6 +129,8 @@ const windows = [
 </style>
 
 <script>
+  import { initWorkspaces, onWorkspaceChange } from '../scripts/workspaces';
+
   // Reloj
   const clock = document.getElementById('tmux-clock');
   const tick = () => {
@@ -137,25 +139,10 @@ const windows = [
   tick();
   setInterval(tick, 15_000);
 
-  // Ventana activa según la sección visible
+  // Workspace activo; la navegación y las teclas 1-4 viven en workspaces.ts
   const links = [...document.querySelectorAll<HTMLAnchorElement>('.tmux [data-section]')];
-  const setActive = (id: string) =>
-    links.forEach((l) => (l.dataset.section === id ? l.setAttribute('aria-current', 'true') : l.removeAttribute('aria-current')));
-
-  const observer = new IntersectionObserver(
-    (entries) => entries.forEach((e) => e.isIntersecting && setActive(e.target.id)),
-    { rootMargin: '-45% 0px -50% 0px' },
+  onWorkspaceChange((id) =>
+    links.forEach((l) => (l.dataset.section === id ? l.setAttribute('aria-current', 'true') : l.removeAttribute('aria-current'))),
   );
-  links.forEach((l) => {
-    const s = document.getElementById(l.dataset.section!);
-    if (s) observer.observe(s);
-  });
-
-  // Atajos: teclas 0-3 como en tmux (fuera de inputs)
-  document.addEventListener('keydown', (e) => {
-    const target = e.target as HTMLElement;
-    if (e.ctrlKey || e.metaKey || e.altKey || target.matches('input, textarea')) return;
-    const link = links[Number(e.key)];
-    if (link) document.getElementById(link.dataset.section!)?.scrollIntoView();
-  });
+  initWorkspaces();
 </script>

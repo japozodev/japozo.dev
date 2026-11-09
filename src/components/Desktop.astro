@@ -1,0 +1,163 @@
+---
+// Mini escritorio Hyprland del hero: ventanas en mosaico (dwindle) que se abren con
+// la animación "popin". `kitty` en la terminal añade una ventana y el mosaico se reorganiza.
+import type { Lang } from '../data/site';
+import { SITE } from '../data/site';
+import { LOGO } from '../data/logo';
+import { useTranslations } from '../i18n/ui';
+import Btop from './Btop.astro';
+import Terminal from './Terminal.astro';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+const chips =
+  lang === 'es'
+    ? ['help', 'kitty', 'cmatrix', 'cava', 'tema', 'sudo hire-me']
+    : ['help', 'kitty', 'cmatrix', 'cava', 'theme', 'sudo hire-me'];
+const now = new Date();
+const age = now.getFullYear() - SITE.birth.year - (now.getMonth() + 1 < SITE.birth.month ? 1 : 0);
+---
+
+<div class="desktop">
+  <div class="tiles" data-count="2">
+    <Terminal lang={lang} />
+    <Btop lang={lang} />
+  </div>
+
+  <div class="chips" aria-label={t.terminal.hint}>
+    <span class="chips__label">{t.terminal.hint}</span>
+    {chips.map((c) => <button type="button" class="chip" data-cmd={c}>{c}</button>)}
+  </div>
+
+  <template id="kitty-tpl">
+    <Terminal lang={lang} kitty />
+  </template>
+
+  <template id="ff-tpl">
+    <div class="ff">
+      <pre class="ff__logo" aria-hidden="true">{LOGO}</pre>
+      <div class="ff__info">
+        <div><span class="ff__key">pozo</span>@<span class="ff__key">japozo.dev</span></div>
+        <div class="c-muted">{'-'.repeat(15)}</div>
+        {t.terminal.ff.map(([k, v]) => <div><span class="ff__key">{k}</span>: {v}</div>)}
+        <div><span class="ff__key">{t.terminal.uptime}</span>: {age} {t.terminal.years}</div>
+        <div class="palette" aria-hidden="true">
+          {['fg', 'danger', 'accent', 'warn', 'info', 'magenta', 'accent-2', 'muted'].map((c) => <span style={`background:var(--${c})`} />)}
+        </div>
+      </div>
+    </div>
+  </template>
+</div>
+
+<style>
+  .desktop {
+    display: grid;
+    gap: 0.9rem;
+    min-width: 0;
+  }
+
+  /* mosaico tipo dwindle: 2 ventanas en columna; con 3, la de abajo se parte en dos */
+  .tiles {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: 'main' 'btop';
+    gap: var(--gaps);
+  }
+  .tiles[data-count='3'] {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-areas: 'main main' 'btop kitty';
+  }
+  .tiles :global(.tile--main) {
+    grid-area: main;
+  }
+  .tiles :global(.tile--btop) {
+    grid-area: btop;
+  }
+  .tiles :global(.tile--kitty) {
+    grid-area: kitty;
+  }
+
+  /* apertura y cierre de ventanas con la curva de Hyprland */
+  :global(.js) .tiles :global(.tile) {
+    opacity: 0;
+    transform: scale(0.82);
+  }
+  :global(.js) .tiles :global(.tile.is-open) {
+    animation: popin 0.5s cubic-bezier(0.05, 0.9, 0.1, 1.05) forwards;
+  }
+  :global(.js) .tiles :global(.tile.is-closing) {
+    animation: popout 0.22s ease-in forwards;
+  }
+  @keyframes popin {
+    from {
+      opacity: 0;
+      transform: scale(0.82);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  @keyframes popout {
+    from {
+      opacity: 1;
+      transform: none;
+    }
+    to {
+      opacity: 0;
+      transform: scale(0.85);
+    }
+  }
+
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.45rem;
+    font-size: 0.8rem;
+  }
+  .chips__label {
+    color: var(--muted);
+  }
+  .chip {
+    padding: 0.3rem 0.7rem;
+    border: 1px dashed var(--border);
+    border-radius: 999px;
+    background: none;
+    color: var(--fg);
+    font: inherit;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s, background-color 0.2s;
+  }
+  .chip::before {
+    content: '$ ';
+    color: var(--accent);
+  }
+  .chip:hover {
+    border-style: solid;
+    border-color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 10%, transparent);
+  }
+
+  @media (max-width: 640px) {
+    .tiles[data-count='3'] {
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-areas: 'main' 'btop' 'kitty';
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    :global(.js) .tiles :global(.tile) {
+      opacity: 1;
+      transform: none;
+    }
+  }
+</style>
+
+<script>
+  import { initDesktop } from '../scripts/desktop';
+  initDesktop();
+</script>

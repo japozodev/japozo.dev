@@ -119,6 +119,10 @@
   --font: 'Hack Nerd Font', 'Hack', ui-monospace, 'Cascadia Code', Consolas, monospace;
   --font-display: 'Fira Code Variable', 'Fira Code', var(--font);
   --radius: 10px;
+  /* valores tipo hyprland.conf; hyprctl keyword los cambia en vivo */
+  --win-border: 2px;
+  --gaps: 12px;
+  --inactive-alpha: 70%;
   --gutter: clamp(1rem, 4vw, 2.5rem);
   --max: 1200px;
   --statusbar-h: 2.25rem;
@@ -291,4 +295,47 @@ p {
     opacity: 1;
     transform: none;
   }
+}
+
+/* ---------- WORKSPACES (View Transitions) ---------- */
+/* cabecera y barra tmux se quedan quietas mientras el contenido se desliza */
+.header {
+  view-transition-name: header;
+}
+.tmux {
+  view-transition-name: tmux;
+}
+html[data-ws] ::view-transition-old(root),
+html[data-ws] ::view-transition-new(root) {
+  animation-duration: 0.5s;
+  animation-timing-function: cubic-bezier(0.05, 0.9, 0.1, 1);
+}
+html[data-ws='next'] ::view-transition-old(root) {
+  animation-name: ws-out-left;
+}
+html[data-ws='next'] ::view-transition-new(root) {
+  animation-name: ws-in-right;
+}
+html[data-ws='prev'] ::view-transition-old(root) {
+  animation-name: ws-out-right;
+}
+html[data-ws='prev'] ::view-transition-new(root) {
+  animation-name: ws-in-left;
+}
+@keyframes ws-out-left {
+  to { transform: translateX(-100%); }
+}
+@keyframes ws-in-right {
+  from { transform: translateX(100%); }
+}
+@keyframes ws-out-right {
+  to { transform: translateX(100%); }
+}
+@keyframes ws-in-left {
+  from { transform: translateX(-100%); }
+}
+/* reordenación del mosaico: misma curva que Hyprland */
+html[data-tiling] ::view-transition-group(*) {
+  animation-duration: 0.45s;
+  animation-timing-function: cubic-bezier(0.05, 0.9, 0.1, 1.05);
 }

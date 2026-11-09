@@ -1,7 +1,7 @@
 ---
 import type { Lang } from '../data/site';
 import { useTranslations } from '../i18n/ui';
-import Terminal from './Terminal.astro';
+import Desktop from './Desktop.astro';
 
 interface Props {
   lang: Lang;
@@ -12,11 +12,7 @@ const t = useTranslations(lang);
 ---
 
 <section id="inicio" class="hero">
-  <div class="hero__bg" aria-hidden="true">
-    <div class="wall wall--a"></div>
-    <div class="wall wall--b"></div>
-    <div class="wall wall--c"></div>
-  </div>
+  <div class="hero__bg" aria-hidden="true"></div>
   <div class="container hero__grid">
     <div class="hero__copy">
       <p class="hero__kicker"><span class="dot"></span>{t.hero.kicker}</p>
@@ -36,7 +32,7 @@ const t = useTranslations(lang);
       </div>
     </div>
 
-    <Terminal lang={lang} />
+    <Desktop lang={lang} />
   </div>
 </section>
 
@@ -49,65 +45,15 @@ const t = useTranslations(lang);
     padding-block: clamp(2.5rem, 6vw, 4rem);
     isolation: isolate;
   }
-  /* wallpaper: formas difusas con los colores del tema + grano, como un fondo de escritorio */
+  /* wallpaper: degradado tramado en píxeles (ver src/pages/wallpaper.svg.ts) */
   .hero__bg {
     position: absolute;
     inset: 0;
     z-index: -1;
-    overflow: hidden;
-    background: linear-gradient(160deg, var(--bg) 30%, color-mix(in srgb, var(--bg) 88%, var(--accent-2)));
-    mask-image: linear-gradient(#000 80%, transparent);
-    -webkit-mask-image: linear-gradient(#000 80%, transparent);
-  }
-  /* grano de película para que no quede plano */
-  .hero__bg::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-    opacity: 0.07;
-    mix-blend-mode: overlay;
-  }
-  /* degradados radiales en lugar de filter: blur, mucho más baratos de pintar */
-  .wall {
-    position: absolute;
-    border-radius: 50%;
-    background: radial-gradient(closest-side, var(--c), transparent);
-    will-change: transform;
-  }
-  .wall--a {
-    width: 46vw;
-    height: 46vw;
-    top: -10%;
-    right: -6%;
-    --c: color-mix(in srgb, var(--accent) 45%, transparent);
-    animation: drift-a 28s ease-in-out infinite alternate;
-  }
-  .wall--b {
-    width: 38vw;
-    height: 30vw;
-    bottom: -8%;
-    right: 22%;
-    --c: color-mix(in srgb, var(--accent-2) 40%, transparent);
-    animation: drift-b 34s ease-in-out infinite alternate;
-  }
-  .wall--c {
-    width: 26vw;
-    height: 26vw;
-    top: 30%;
-    left: -8%;
-    --c: color-mix(in srgb, var(--magenta) 22%, transparent);
-    animation: drift-a 40s ease-in-out infinite alternate-reverse;
-  }
-  @keyframes drift-a {
-    to {
-      transform: translate(-6vw, 5vh) scale(1.1);
-    }
-  }
-  @keyframes drift-b {
-    to {
-      transform: translate(5vw, -6vh) scale(0.9);
-    }
+    background: linear-gradient(135deg, var(--accent-2), var(--accent));
+    -webkit-mask: url('/wallpaper.svg') right bottom / cover no-repeat;
+    mask: url('/wallpaper.svg') right bottom / cover no-repeat;
+    opacity: 0.26;
   }
   .hero__grid {
     display: grid;
@@ -206,15 +152,8 @@ const t = useTranslations(lang);
     .hero {
       min-height: auto;
     }
-    .wall--a {
-      width: 90vw;
-      height: 90vw;
-      top: 35%;
-    }
-    .wall--b {
-      width: 70vw;
-      height: 60vw;
-      right: -10%;
+    .hero__bg {
+      opacity: 0.16;
     }
     .hero__grid {
       grid-template-columns: minmax(0, 1fr);
