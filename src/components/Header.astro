@@ -15,15 +15,13 @@ const other: Lang = lang === 'es' ? 'en' : 'es';
 <header class="header">
   <div class="container header__inner">
     <a href={pathFor(lang)} class="logo" aria-label="japozo.dev">
-      <span class="logo__icon" aria-hidden="true">{''}</span>
-      <span>japozo<span class="c-accent">.dev</span></span>
+      japozo<span class="c-accent" aria-hidden="true">&gt;</span>
     </a>
 
     <div class="header__actions">
       <div class="theme-picker">
         <button class="icon-btn" id="theme-btn" aria-haspopup="true" aria-expanded="false" aria-controls="theme-menu">
-          <span aria-hidden="true">{''}</span>
-          <span class="theme-picker__label">{t.theme}</span>
+          {t.theme.toLowerCase()}
         </button>
         <ul class="theme-menu" id="theme-menu" role="menu" hidden>
           {
@@ -47,8 +45,7 @@ const other: Lang = lang === 'es' ? 'en' : 'es';
         title={t.switchLang}
         aria-label={t.switchLang}
       >
-        <span aria-hidden="true">{''}</span>
-        {other.toUpperCase()}
+        {other}
       </a>
     </div>
   </div>
@@ -59,30 +56,19 @@ const other: Lang = lang === 'es' ? 'en' : 'es';
     position: sticky;
     top: 0;
     z-index: 50;
-    background: color-mix(in srgb, var(--bg) 78%, transparent);
-    backdrop-filter: blur(12px) saturate(1.4);
-    -webkit-backdrop-filter: blur(12px) saturate(1.4);
-    border-bottom: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
   }
   .header__inner {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 1rem;
-    height: 3.75rem;
+    height: 3.25rem;
   }
   .logo {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.6rem;
     font-weight: 700;
-    font-size: 1.05rem;
     text-decoration: none;
-  }
-  .logo__icon {
-    color: var(--accent);
-    font-size: 1.4rem;
-    line-height: 1;
   }
   .header__actions {
     display: flex;
@@ -90,24 +76,24 @@ const other: Lang = lang === 'es' ? 'en' : 'es';
     gap: 0.5rem;
   }
   .icon-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.45rem 0.8rem;
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    background: var(--surface);
-    color: var(--fg);
+    padding: 0.3rem 0.5rem;
+    border: 0;
+    background: none;
+    color: var(--muted);
     font: inherit;
     font-size: 0.85rem;
     text-decoration: none;
     cursor: pointer;
-    transition: border-color 0.2s, color 0.2s;
   }
   .icon-btn:hover,
   .icon-btn[aria-expanded='true'] {
-    border-color: var(--accent);
     color: var(--accent);
+  }
+  .icon-btn::before {
+    content: '[';
+  }
+  .icon-btn::after {
+    content: ']';
   }
   .theme-picker {
     position: relative;
@@ -156,11 +142,6 @@ const other: Lang = lang === 'es' ? 'en' : 'es';
     background: var(--swatch);
   }
 
-  @media (max-width: 520px) {
-    .theme-picker__label {
-      display: none;
-    }
-  }
 </style>
 
 <script>

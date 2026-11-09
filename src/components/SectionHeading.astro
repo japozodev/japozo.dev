@@ -13,7 +13,7 @@ const { cmd, path, title, lead, index } = Astro.props;
 
 <header class="sh reveal">
   <p class="sh__cmd" aria-hidden="true">
-    <span class="seg seg--os">{''}</span><span class="seg seg--path">{path}</span><span class="seg-end">{''}</span>
+    <span class="ps1"><b>pozo@japozo</b> <i>{path}</i> $</span>
     <span class="sh__typed" style={`--n:${cmd.length}`}>{cmd}</span>
   </p>
   <h2 class="sh__title"><span class="sh__index" aria-hidden="true">{index}.</span>{title}</h2>
@@ -32,20 +32,13 @@ const { cmd, path, title, lead, index } = Astro.props;
     margin: 0 0 1rem;
     font-size: 0.85rem;
   }
-  .seg {
-    padding-inline: 0.5em;
-    line-height: 1.6;
+  .ps1 b {
+    color: var(--accent);
   }
-  .seg--os {
-    background: var(--accent);
-    color: var(--accent-ink);
-  }
-  .seg--path {
-    background: var(--surface-2);
-  }
-  .seg-end {
-    color: var(--surface-2);
-    margin-left: -0.6rem;
+  .ps1 i {
+    font-style: normal;
+    font-weight: 700;
+    color: var(--info);
   }
   .sh__typed {
     display: inline-block;
