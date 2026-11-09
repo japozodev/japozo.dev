@@ -63,6 +63,8 @@ const jsonLd = {
     <script is:inline define:vars={{ THEME_KEY }}>
       const root = document.documentElement;
       root.classList.add('js');
+      // cubo de workspaces (ver scripts/workspaces.ts)
+      if (matchMedia('(min-width: 900px) and (min-height: 560px) and (prefers-reduced-motion: no-preference)').matches) root.classList.add('cube');
       let theme = null;
       try { theme = localStorage.getItem(THEME_KEY); } catch {}
       if (!theme && matchMedia('(prefers-color-scheme: light)').matches) theme = 'latte';

@@ -2,7 +2,7 @@ import { SOCIAL } from '../data/site';
 import { THEMES } from '../data/themes';
 import { applyTheme, currentTheme } from './theme';
 import { getEmail } from './email';
-import { goToSection } from './workspaces';
+import { goToSection, spinCube } from './workspaces';
 import { cava, cmatrix } from './effects';
 import { hyprctl } from './hyprctl';
 
@@ -39,6 +39,7 @@ const TXT = {
       ['email · github · linkedin', 'contacto'],
       ['tema [nombre]', 'cambia el tema de colores'],
       ['kitty', 'abre otra terminal en el mosaico'],
+      ['cube', 'una vuelta al cubo de workspaces'],
       ['cmatrix · cava', 'efectos (cualquier tecla para salir)'],
       ['hyprctl', 'ajusta el escritorio en vivo'],
       ['lang en', 'switch to English'],
@@ -61,6 +62,8 @@ const TXT = {
     langSwitch: 'Cambiando de idioma...',
     kittyFull: 'hyprland: workspace lleno. Cierra una ventana con <span class="ok">exit</span>.',
     kittyOpen: 'Abriendo kitty...',
+    cube: 'compiz --replace &amp;  <span class="c-muted"># como en 2008</span>',
+    cubeOff: 'cube: la pantalla es demasiado pequeña para el cubo.',
   },
   en: {
     welcome: 'Welcome to <b>japozo.dev</b>. Type <span class="ok">help</span> to list the commands.',
@@ -74,6 +77,7 @@ const TXT = {
       ['email · github · linkedin', 'contact'],
       ['theme [name]', 'change the colour theme'],
       ['kitty', 'open another terminal in the tiling'],
+      ['cube', 'spin the workspace cube'],
       ['cmatrix · cava', 'effects (any key to quit)'],
       ['hyprctl', 'tweak the desktop live'],
       ['lang es', 'cambiar a español'],
@@ -96,6 +100,8 @@ const TXT = {
     langSwitch: 'Switching language...',
     kittyFull: 'hyprland: workspace is full. Close a window with <span class="ok">exit</span>.',
     kittyOpen: 'Opening kitty...',
+    cube: 'compiz --replace &amp;  <span class="c-muted"># like it is 2008</span>',
+    cubeOff: 'cube: the screen is too small for the cube.',
   },
 };
 
@@ -115,7 +121,7 @@ const SECTIONS: Record<string, string> = {
 
 const COMMANDS = [
   'help', 'whoami', 'fastfetch', 'ls', 'cat bio.txt', 'cd', 'email', 'github', 'linkedin',
-  'tema', 'theme', 'kitty', 'cmatrix', 'cava', 'hyprctl', 'lang', 'history', 'date', 'clear',
+  'tema', 'theme', 'kitty', 'cube', 'cmatrix', 'cava', 'hyprctl', 'lang', 'history', 'date', 'clear',
   'sudo hire-me', 'exit', 'proyectos', 'projects', 'contacto', 'contact', 'sobre-mi', 'about', 'echo',
 ];
 
@@ -241,6 +247,11 @@ export function createTerminal(root: HTMLElement, opts: TerminalOptions = {}): T
         if (!opts.spawn()) print(T.kittyFull, 'c-warn');
         return;
       }
+      case 'cube':
+      case 'compiz':
+        if (!document.documentElement.classList.contains('cube')) return print(T.cubeOff, 'c-warn');
+        print(T.cube, 'c-muted');
+        return void setTimeout(spinCube, 250);
       case 'cmatrix':
         stopEffect = cmatrix(term);
         return;

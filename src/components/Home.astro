@@ -21,10 +21,14 @@ const year = new Date().getFullYear();
 <Base lang={lang}>
   <Header lang={lang} />
   <main id="main">
-    <Hero lang={lang} />
-    <Projects lang={lang} />
-    <About lang={lang} />
-    <Contact lang={lang} />
+    <div class="cube-tilt" id="cube-tilt">
+      <div class="cube" id="cube">
+        <Hero lang={lang} />
+        <Projects lang={lang} />
+        <About lang={lang} />
+        <Contact lang={lang} />
+      </div>
+    </div>
   </main>
   <footer class="footer">
     <div class="container footer__inner">

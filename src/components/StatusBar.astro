@@ -102,6 +102,47 @@ const windows = [
     color: var(--fg);
   }
 
+  /* modo cubo: los workspaces salen de la barra y se apilan a la izquierda */
+  :global(html.cube) .tmux__windows {
+    position: fixed;
+    top: calc(var(--header-h) + (100dvh - var(--header-h) - var(--statusbar-h)) / 2);
+    left: 0;
+    width: var(--nav-w);
+    flex-direction: column;
+    gap: 0.7rem;
+    padding-inline: 1.5rem 1rem;
+    transform: translateY(-50%);
+  }
+  :global(html.cube) .tmux__windows a {
+    position: relative;
+    gap: 0.6rem;
+    width: 100%;
+    padding: 0.6rem 0.8rem;
+    border: 1px solid var(--border);
+    background: color-mix(in srgb, var(--surface) 70%, transparent);
+    font-size: 0.85rem;
+    transition: color 0.2s, border-color 0.2s, background-color 0.2s, transform 0.2s;
+  }
+  :global(html.cube) .tmux__windows a:hover {
+    border-color: color-mix(in srgb, var(--accent) 60%, var(--border));
+    transform: translateX(3px);
+  }
+  :global(html.cube) .tmux__windows a[aria-current='true'] {
+    border-color: transparent;
+    border-image: linear-gradient(45deg, var(--accent), var(--accent-2)) 1;
+    background: color-mix(in srgb, var(--accent) 10%, var(--surface));
+    box-shadow: 0 0 24px -8px var(--glow);
+  }
+  :global(html.cube) .tmux__right {
+    margin-left: auto;
+  }
+  :global(html.cube) .tmux__n {
+    color: var(--muted);
+  }
+  :global(html.cube) .tmux__windows a[aria-current='true'] .tmux__n {
+    color: var(--accent);
+  }
+
   @media (max-width: 760px) {
     .tmux__host {
       display: none;
