@@ -76,24 +76,6 @@
   --magenta: #ff2a6d;
   --glow: rgb(252 238 10 / 0.25);
 }
-[data-theme='tokyo'] {
-  color-scheme: dark;
-  --bg: #13141c;
-  --bg-alt: #1a1b26;
-  --surface: #1f2130;
-  --surface-2: #24283b;
-  --border: #2f3549;
-  --fg: #c8d0f5;
-  --muted: #7a82a8;
-  --accent: #7aa2f7;
-  --accent-2: #bb9af7;
-  --accent-ink: #10142a;
-  --info: #7dcfff;
-  --warn: #e0af68;
-  --danger: #f7768e;
-  --magenta: #bb9af7;
-  --glow: rgb(122 162 247 / 0.35);
-}
 [data-theme='gruvbox'] {
   color-scheme: dark;
   --bg: #1d2021;

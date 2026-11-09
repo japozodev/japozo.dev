@@ -2,7 +2,6 @@
 import type { Lang } from '../data/site';
 import { useTranslations } from '../i18n/ui';
 import Terminal from './Terminal.astro';
-import { BG_LOG } from '../data/bglog';
 
 interface Props {
   lang: Lang;
@@ -10,13 +9,13 @@ interface Props {
 
 const { lang } = Astro.props;
 const t = useTranslations(lang);
-// duplicado para que el desplazamiento en bucle no tenga salto
-const bgLog = [...BG_LOG, ...BG_LOG].join('\n');
 ---
 
 <section id="inicio" class="hero">
   <div class="hero__bg" aria-hidden="true">
-    <pre class="hero__log">{bgLog}</pre>
+    <div class="wall wall--a"></div>
+    <div class="wall wall--b"></div>
+    <div class="wall wall--c"></div>
   </div>
   <div class="container hero__grid">
     <div class="hero__copy">
@@ -50,30 +49,64 @@ const bgLog = [...BG_LOG, ...BG_LOG].join('\n');
     padding-block: clamp(2.5rem, 6vw, 4rem);
     isolation: isolate;
   }
-  /* log de sistema casi invisible que sube muy despacio */
+  /* wallpaper: formas difusas con los colores del tema + grano, como un fondo de escritorio */
   .hero__bg {
     position: absolute;
     inset: 0;
     z-index: -1;
-    left: 48%;
     overflow: hidden;
-    mask-image: linear-gradient(transparent, #000 25%, #000 75%, transparent);
-    -webkit-mask-image: linear-gradient(transparent, #000 25%, #000 75%, transparent);
+    background: linear-gradient(160deg, var(--bg) 30%, color-mix(in srgb, var(--bg) 88%, var(--accent-2)));
+    mask-image: linear-gradient(#000 80%, transparent);
+    -webkit-mask-image: linear-gradient(#000 80%, transparent);
   }
-  .hero__log {
-    margin: 0;
-    padding-inline: var(--gutter);
-    font: inherit;
-    font-size: 0.8rem;
-    line-height: 1.9;
-    white-space: pre;
-    color: var(--fg);
-    opacity: 0.08;
-    animation: log-scroll 140s linear infinite;
+  /* grano de película para que no quede plano */
+  .hero__bg::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    opacity: 0.07;
+    mix-blend-mode: overlay;
   }
-  @keyframes log-scroll {
+  /* degradados radiales en lugar de filter: blur, mucho más baratos de pintar */
+  .wall {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(closest-side, var(--c), transparent);
+    will-change: transform;
+  }
+  .wall--a {
+    width: 46vw;
+    height: 46vw;
+    top: -10%;
+    right: -6%;
+    --c: color-mix(in srgb, var(--accent) 45%, transparent);
+    animation: drift-a 28s ease-in-out infinite alternate;
+  }
+  .wall--b {
+    width: 38vw;
+    height: 30vw;
+    bottom: -8%;
+    right: 22%;
+    --c: color-mix(in srgb, var(--accent-2) 40%, transparent);
+    animation: drift-b 34s ease-in-out infinite alternate;
+  }
+  .wall--c {
+    width: 26vw;
+    height: 26vw;
+    top: 30%;
+    left: -8%;
+    --c: color-mix(in srgb, var(--magenta) 22%, transparent);
+    animation: drift-a 40s ease-in-out infinite alternate-reverse;
+  }
+  @keyframes drift-a {
     to {
-      transform: translateY(-50%);
+      transform: translate(-6vw, 5vh) scale(1.1);
+    }
+  }
+  @keyframes drift-b {
+    to {
+      transform: translate(5vw, -6vh) scale(0.9);
     }
   }
   .hero__grid {
@@ -173,13 +206,15 @@ const bgLog = [...BG_LOG, ...BG_LOG].join('\n');
     .hero {
       min-height: auto;
     }
-    /* en una columna el log queda detrás de la terminal */
-    .hero__bg {
-      left: 0;
-      top: 40%;
+    .wall--a {
+      width: 90vw;
+      height: 90vw;
+      top: 35%;
     }
-    .hero__log {
-      opacity: 0.06;
+    .wall--b {
+      width: 70vw;
+      height: 60vw;
+      right: -10%;
     }
     .hero__grid {
       grid-template-columns: minmax(0, 1fr);

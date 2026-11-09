@@ -65,16 +65,18 @@ const age = now.getFullYear() - SITE.birth.year - (now.getMonth() + 1 < SITE.bir
     gap: 0.9rem;
     min-width: 0;
   }
-  /* ventana inactiva al 80%, como en KDE: opaca al pasar el ratón o al escribir */
+  /* ventana inactiva al 70% con blur, como en Hyprland: opaca al pasar el ratón o al escribir */
   .terminal-wrap :global(.window),
   .terminal-wrap :global(.window__bar) {
     transition: background-color 0.35s ease;
   }
   .terminal-wrap :global(.window) {
-    background: color-mix(in srgb, var(--bg-alt) 80%, transparent);
+    background: color-mix(in srgb, var(--bg-alt) 70%, transparent);
+    backdrop-filter: blur(14px) saturate(1.3);
+    -webkit-backdrop-filter: blur(14px) saturate(1.3);
   }
   .terminal-wrap :global(.window__bar) {
-    background: color-mix(in srgb, var(--surface) 80%, transparent);
+    background: color-mix(in srgb, var(--surface) 70%, transparent);
   }
   .terminal-wrap:hover :global(.window),
   .terminal-wrap:focus-within :global(.window) {
