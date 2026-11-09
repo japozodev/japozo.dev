@@ -1,0 +1,162 @@
+---
+import type { Lang } from '../data/site';
+import { SOCIAL } from '../data/site';
+import { useTranslations } from '../i18n/ui';
+import SectionHeading from './SectionHeading.astro';
+import Window from './Window.astro';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+const short = (url: string) => url.replace(/^https:\/\/(www\.)?/, '').replace(/\/$/, '');
+---
+
+<section id="contacto" class="section contact">
+  <div class="container">
+    <SectionHeading index="03" path="~/contacto" cmd="./contacto.sh" title={t.contact.title} lead={t.contact.lead} />
+
+    <div class="reveal">
+      <Window title="contacto.sh — zsh" icon={''}>
+        <div class="contact__body">
+          <dl class="rows">
+            <div class="row">
+              <dt><span aria-hidden="true">{''}</span> {t.contact.email}</dt>
+              <dd>
+                <a id="email-link" href="#contacto" class="email" data-label={t.contact.reveal}>[ {t.contact.reveal} ]</a>
+                <button type="button" id="copy-btn" class="copy" data-ok={t.contact.copied} data-err={t.contact.copyError}>
+                  <span aria-hidden="true">{''}</span> {t.contact.copy}
+                </button>
+              </dd>
+            </div>
+            <div class="row">
+              <dt><span aria-hidden="true">{''}</span> github</dt>
+              <dd><a href={SOCIAL.github} target="_blank" rel="noopener">{short(SOCIAL.github)} <span aria-hidden="true">↗</span></a></dd>
+            </div>
+            <div class="row">
+              <dt><span aria-hidden="true">{''}</span> linkedin</dt>
+              <dd><a href={SOCIAL.linkedin} target="_blank" rel="noopener">{short(SOCIAL.linkedin)} <span aria-hidden="true">↗</span></a></dd>
+            </div>
+            <div class="row">
+              <dt><span aria-hidden="true">{''}</span> {t.contact.location}</dt>
+              <dd>{t.contact.locationValue}</dd>
+            </div>
+          </dl>
+          <p class="toast" id="copy-toast" role="status" aria-live="polite"></p>
+        </div>
+      </Window>
+    </div>
+  </div>
+</section>
+
+<style>
+  .contact__body {
+    padding: clamp(1.25rem, 3vw, 2rem);
+  }
+  .rows {
+    display: grid;
+    gap: 1rem;
+    margin: 0;
+  }
+  .row {
+    display: grid;
+    grid-template-columns: 12ch minmax(0, 1fr);
+    gap: 1rem;
+    align-items: center;
+    padding-bottom: 1rem;
+    border-bottom: 1px dashed var(--border);
+  }
+  .row:last-child {
+    border-bottom: 0;
+    padding-bottom: 0;
+  }
+  .row dt {
+    color: var(--accent);
+  }
+  .row dd {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.8rem;
+    margin: 0;
+    min-width: 0;
+    overflow-wrap: anywhere;
+    font-size: clamp(0.9rem, 0.85rem + 0.4vw, 1.15rem);
+  }
+  .row a {
+    text-decoration: none;
+    background: linear-gradient(var(--accent), var(--accent)) 0 100% / 0 1px no-repeat;
+    transition: background-size 0.3s, color 0.2s;
+  }
+  .row a:hover {
+    color: var(--accent);
+    background-size: 100% 1px;
+  }
+  .copy {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.3rem 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    background: var(--surface);
+    color: var(--fg);
+    font: inherit;
+    font-size: 0.8rem;
+    cursor: pointer;
+  }
+  .copy:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .toast {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--accent);
+  }
+  .toast:not(:empty) {
+    margin-top: 1.25rem;
+  }
+  .toast.is-error {
+    color: var(--danger);
+  }
+  @media (max-width: 520px) {
+    .row {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 0.3rem;
+    }
+  }
+</style>
+
+<script>
+  import { copyEmail, getEmail } from '../scripts/email';
+
+  const link = document.getElementById('email-link') as HTMLAnchorElement | null;
+  const btn = document.getElementById('copy-btn');
+  const toast = document.getElementById('copy-toast');
+
+  const reveal = () => {
+    if (!link || link.dataset.revealed) return;
+    const mail = getEmail();
+    link.href = `mailto:${mail}`;
+    link.textContent = mail;
+    link.dataset.revealed = 'true';
+  };
+
+  link?.addEventListener('click', (e) => {
+    if (!link.dataset.revealed) {
+      e.preventDefault();
+      reveal();
+    }
+  });
+
+  btn?.addEventListener('click', async () => {
+    reveal();
+    const ok = await copyEmail();
+    if (!toast) return;
+    toast.classList.toggle('is-error', !ok);
+    toast.textContent = `${ok ? '✓' : '✗'} ${ok ? btn.dataset.ok : btn.dataset.err}`;
+  });
+</script>

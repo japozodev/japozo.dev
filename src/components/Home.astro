@@ -1,0 +1,66 @@
+---
+import type { Lang } from '../data/site';
+import { useTranslations } from '../i18n/ui';
+import Base from '../layouts/Base.astro';
+import About from './About.astro';
+import Contact from './Contact.astro';
+import Header from './Header.astro';
+import Hero from './Hero.astro';
+import Projects from './Projects.astro';
+import StatusBar from './StatusBar.astro';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+const year = new Date().getFullYear();
+---
+
+<Base lang={lang}>
+  <Header lang={lang} />
+  <main id="main">
+    <Hero lang={lang} />
+    <Projects lang={lang} />
+    <About lang={lang} />
+    <Contact lang={lang} />
+  </main>
+  <footer class="footer">
+    <div class="container footer__inner">
+      <span>© {year} J. A. Pozo</span>
+      <span class="c-muted">{t.footer.made}</span>
+      <span class="c-accent" aria-hidden="true">exit 0</span>
+    </div>
+  </footer>
+  <StatusBar lang={lang} />
+</Base>
+
+<style>
+  .footer {
+    padding-block: 2rem 2.5rem;
+    border-top: 1px solid var(--border);
+    font-size: 0.8rem;
+  }
+  .footer__inner {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.5rem 1.5rem;
+  }
+</style>
+
+<script>
+  // Aparición progresiva al hacer scroll
+  const io = new IntersectionObserver(
+    (entries) =>
+      entries.forEach((e) => {
+        if (e.isIntersecting) {
+          e.target.classList.add('is-visible');
+          io.unobserve(e.target);
+        }
+      }),
+    { rootMargin: '0px 0px -10% 0px' },
+  );
+  document.querySelectorAll('.reveal').forEach((el) => io.observe(el));
+</script>

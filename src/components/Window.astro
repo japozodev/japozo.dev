@@ -1,0 +1,79 @@
+---
+// Marco de ventana estilo KDE Breeze (Manjaro): título centrado y botones a la derecha
+interface Props {
+  title: string;
+  icon?: string;
+  class?: string;
+}
+
+const { title, icon = '', class: className } = Astro.props;
+---
+
+<div class:list={['window', className]}>
+  <div class="window__bar" aria-hidden="true">
+    <span class="window__icon">{icon}</span>
+    <span class="window__title">{title}</span>
+    <span class="window__controls">
+      <span class="ctl ctl--min"></span>
+      <span class="ctl ctl--max"></span>
+      <span class="ctl ctl--close"></span>
+    </span>
+  </div>
+  <div class="window__body">
+    <slot />
+  </div>
+</div>
+
+<style>
+  .window {
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-alt);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow:
+      0 1px 0 0 color-mix(in srgb, var(--fg) 6%, transparent) inset,
+      0 30px 60px -30px rgb(0 0 0 / 0.6);
+  }
+  .window__bar {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    font-size: 0.78rem;
+    color: var(--muted);
+    user-select: none;
+  }
+  .window__icon {
+    color: var(--accent);
+  }
+  .window__title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .window__controls {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.45rem;
+  }
+  .ctl {
+    width: 0.8rem;
+    height: 0.8rem;
+    border-radius: 50%;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+  }
+  .ctl--close {
+    background: color-mix(in srgb, var(--danger) 75%, var(--surface));
+    border-color: transparent;
+  }
+  .window__body {
+    flex: 1;
+    min-height: 0;
+  }
+</style>

@@ -1,0 +1,203 @@
+---
+import type { Lang } from '../data/site';
+import { THEMES } from '../data/themes';
+import { pathFor, useTranslations } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+const other: Lang = lang === 'es' ? 'en' : 'es';
+---
+
+<header class="header">
+  <div class="container header__inner">
+    <a href={pathFor(lang)} class="logo" aria-label="japozo.dev">
+      <span class="logo__icon" aria-hidden="true">{''}</span>
+      <span>japozo<span class="c-accent">.dev</span></span>
+    </a>
+
+    <div class="header__actions">
+      <div class="theme-picker">
+        <button class="icon-btn" id="theme-btn" aria-haspopup="true" aria-expanded="false" aria-controls="theme-menu">
+          <span aria-hidden="true">{''}</span>
+          <span class="theme-picker__label">{t.theme}</span>
+        </button>
+        <ul class="theme-menu" id="theme-menu" role="menu" hidden>
+          {
+            THEMES.map((th) => (
+              <li role="none">
+                <button role="menuitemradio" aria-checked="false" data-theme-id={th.id}>
+                  <span class="swatch" style={`--swatch:${th.swatch}`} aria-hidden="true" />
+                  {th.label}
+                </button>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+
+      <a
+        href={pathFor(other)}
+        class="icon-btn lang-btn"
+        hreflang={other}
+        lang={other}
+        title={t.switchLang}
+        aria-label={t.switchLang}
+      >
+        <span aria-hidden="true">{''}</span>
+        {other.toUpperCase()}
+      </a>
+    </div>
+  </div>
+</header>
+
+<style>
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: color-mix(in srgb, var(--bg) 78%, transparent);
+    backdrop-filter: blur(12px) saturate(1.4);
+    -webkit-backdrop-filter: blur(12px) saturate(1.4);
+    border-bottom: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
+  }
+  .header__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    height: 3.75rem;
+  }
+  .logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-weight: 700;
+    font-size: 1.05rem;
+    text-decoration: none;
+  }
+  .logo__icon {
+    color: var(--accent);
+    font-size: 1.4rem;
+    line-height: 1;
+  }
+  .header__actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .icon-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.45rem 0.8rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--surface);
+    color: var(--fg);
+    font: inherit;
+    font-size: 0.85rem;
+    text-decoration: none;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .icon-btn:hover,
+  .icon-btn[aria-expanded='true'] {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .theme-picker {
+    position: relative;
+  }
+  .theme-menu {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 0.5rem);
+    min-width: 13rem;
+    margin: 0;
+    padding: 0.4rem;
+    list-style: none;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    box-shadow: 0 20px 40px -12px rgb(0 0 0 / 0.5);
+  }
+  .theme-menu button {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    width: 100%;
+    padding: 0.55rem 0.7rem;
+    border: 0;
+    border-radius: 5px;
+    background: none;
+    color: var(--fg);
+    font: inherit;
+    font-size: 0.85rem;
+    text-align: left;
+    cursor: pointer;
+  }
+  .theme-menu button:hover,
+  .theme-menu button:focus-visible {
+    background: var(--surface-2);
+  }
+  .theme-menu button[aria-checked='true']::after {
+    content: '\f00c';
+    margin-left: auto;
+    color: var(--accent);
+  }
+  .swatch {
+    width: 0.9rem;
+    height: 0.9rem;
+    border-radius: 3px;
+    background: var(--swatch);
+  }
+
+  @media (max-width: 520px) {
+    .theme-picker__label {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  import { applyTheme, currentTheme } from '../scripts/theme';
+
+  const btn = document.getElementById('theme-btn')!;
+  const menu = document.getElementById('theme-menu')!;
+  const items = [...menu.querySelectorAll<HTMLButtonElement>('[data-theme-id]')];
+
+  const sync = () =>
+    items.forEach((i) => i.setAttribute('aria-checked', String(i.dataset.themeId === currentTheme())));
+
+  const toggle = (open: boolean) => {
+    menu.hidden = !open;
+    btn.setAttribute('aria-expanded', String(open));
+    if (open) {
+      sync();
+      items.find((i) => i.getAttribute('aria-checked') === 'true')?.focus();
+    }
+  };
+
+  btn.addEventListener('click', () => toggle(menu.hidden));
+  items.forEach((i) =>
+    i.addEventListener('click', () => {
+      applyTheme(i.dataset.themeId!);
+      toggle(false);
+      btn.focus();
+    }),
+  );
+  document.addEventListener('click', (e) => {
+    if (!menu.hidden && !(e.target as Element).closest('.theme-picker')) toggle(false);
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !menu.hidden) {
+      toggle(false);
+      btn.focus();
+    }
+  });
+  document.addEventListener('themechange', sync);
+</script>

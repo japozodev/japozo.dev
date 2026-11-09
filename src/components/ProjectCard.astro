@@ -1,0 +1,254 @@
+---
+import { Image } from 'astro:assets';
+import type { Lang, Project } from '../data/site';
+import { useTranslations } from '../i18n/ui';
+import Window from './Window.astro';
+
+interface Props {
+  project: Project;
+  lang: Lang;
+  index: number;
+}
+
+const { project, lang, index } = Astro.props;
+const t = useTranslations(lang);
+const queued = project.status === 'queued';
+const num = String(index + 1).padStart(2, '0');
+---
+
+<article class:list={['card reveal', { 'card--queued': queued }]} style={`--delay:${index * 80}ms`}>
+  <Window title={project.domain ?? `~/proyectos/${project.slug}`} icon={queued ? '' : ''}>
+    <div class="card__media">
+      {
+        project.image ? (
+          <Image
+            src={project.image}
+            alt={project.name}
+            widths={[480, 800, 1200]}
+            sizes="(max-width: 760px) 100vw, 580px"
+            format="webp"
+            quality={78}
+            loading="lazy"
+          />
+        ) : (
+          <div class="card__placeholder" aria-hidden="true">
+            <span class="card__ph-icon">{''}</span>
+            <span>// {t.projects.soon}</span>
+            <span class="card__ph-bar"><span /></span>
+          </div>
+        )
+      }
+    </div>
+  </Window>
+
+  <div class="card__body">
+    <div class="card__top">
+      <span class="card__num">{num}</span>
+      <span class:list={['status', queued ? 'status--queued' : 'status--online']}>
+        {queued ? t.projects.queued : t.projects.online}
+      </span>
+    </div>
+    <h3 class="card__title">
+      {
+        project.url ? (
+          <a href={project.url} target="_blank" rel="noopener noreferrer" class="card__link">
+            {project.name}
+          </a>
+        ) : (
+          project.name
+        )
+      }
+    </h3>
+    <p class="card__desc">{project.desc[lang]}</p>
+    <dl class="card__meta">
+      <div><dt>{t.projects.role}</dt><dd>{project.role[lang]}</dd></div>
+      <div>
+        <dt>{t.projects.stack}</dt>
+        <dd class="tags">{project.stack.map((s) => <span class="tag">{s}</span>)}</dd>
+      </div>
+    </dl>
+    {
+      project.url && (
+        <span class="card__visit" aria-hidden="true">
+          {t.projects.visit} <span class="arrow">{''}</span>
+        </span>
+      )
+    }
+  </div>
+</article>
+
+<style>
+  .card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    transition-delay: var(--delay);
+  }
+  .card :global(.window) {
+    transition: transform 0.4s cubic-bezier(0.2, 0.7, 0.2, 1), border-color 0.3s, box-shadow 0.4s;
+  }
+  .card:hover :global(.window) {
+    transform: translateY(-6px);
+    border-color: color-mix(in srgb, var(--accent) 60%, var(--border));
+    box-shadow: 0 30px 60px -25px var(--glow);
+  }
+  .card__media {
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+    background: var(--surface);
+  }
+  .card__media :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top center;
+    transition: transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1), filter 0.4s;
+    filter: saturate(0.85);
+  }
+  .card:hover .card__media :global(img) {
+    transform: scale(1.04);
+    filter: none;
+  }
+  .card__placeholder {
+    display: grid;
+    place-content: center;
+    justify-items: center;
+    gap: 0.8rem;
+    height: 100%;
+    color: var(--muted);
+    background:
+      repeating-linear-gradient(-45deg, transparent 0 12px, color-mix(in srgb, var(--border) 35%, transparent) 12px 13px),
+      var(--bg-alt);
+  }
+  .card__ph-icon {
+    font-size: 2.5rem;
+    color: var(--accent);
+  }
+  .card__ph-bar {
+    width: 10rem;
+    height: 0.4rem;
+    border-radius: 99px;
+    background: var(--surface-2);
+    overflow: hidden;
+  }
+  .card__ph-bar span {
+    display: block;
+    width: 35%;
+    height: 100%;
+    background: var(--accent);
+    animation: load 1.8s ease-in-out infinite alternate;
+  }
+  .card--queued :global(.window) {
+    border-style: dashed;
+  }
+  .card__body {
+    display: grid;
+    gap: 0.8rem;
+  }
+  .card__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.8rem;
+  }
+  .card__num {
+    color: var(--muted);
+  }
+  .status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+  }
+  .status::before {
+    content: '';
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: currentColor;
+  }
+  .status--online {
+    color: var(--accent);
+  }
+  .status--queued {
+    color: var(--warn);
+  }
+  .card__title {
+    font-size: clamp(1.3rem, 1.1rem + 0.8vw, 1.7rem);
+    letter-spacing: -0.02em;
+  }
+  .card__link {
+    text-decoration: none;
+  }
+  /* toda la tarjeta es clicable */
+  .card__link::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+  }
+  .card__link:focus-visible {
+    outline: none;
+  }
+  .card:has(.card__link:focus-visible) {
+    outline: 2px solid var(--accent);
+    outline-offset: 8px;
+    border-radius: var(--radius);
+  }
+  .card__desc {
+    margin: 0;
+    color: var(--muted);
+  }
+  .card__meta {
+    display: grid;
+    gap: 0.5rem;
+    margin: 0;
+    font-size: 0.82rem;
+  }
+  .card__meta div {
+    display: grid;
+    grid-template-columns: 6ch 1fr;
+    gap: 1ch;
+    align-items: start;
+  }
+  .card__meta dt {
+    color: var(--accent);
+  }
+  .card__meta dt::after {
+    content: ':';
+  }
+  .card__meta dd {
+    margin: 0;
+  }
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+  .tag {
+    padding: 0.05rem 0.5rem;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: var(--surface);
+    font-size: 0.75rem;
+  }
+  .card__visit {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--accent);
+  }
+  .arrow {
+    transition: transform 0.3s;
+  }
+  .card:hover .arrow {
+    transform: translate(3px, -3px);
+  }
+
+  @keyframes load {
+    to {
+      transform: translateX(185%);
+    }
+  }
+</style>
