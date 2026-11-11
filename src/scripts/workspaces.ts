@@ -111,6 +111,13 @@ function initWheel() {
     (e) => {
       if (!cubeOn() || e.ctrlKey || Math.abs(e.deltaY) < Math.abs(e.deltaX)) return;
       if ((e.target as Element).closest('.dock')) return;
+      // una lista con scroll dentro de la cara (proyectos) se desplaza primero; el
+      // cubo solo gira cuando ya está en el tope
+      const list = (e.target as Element).closest<HTMLElement>('.projects');
+      if (list && list.scrollHeight > list.clientHeight + 1) {
+        const atEdge = e.deltaY > 0 ? list.scrollTop + list.clientHeight >= list.scrollHeight - 2 : list.scrollTop <= 0;
+        if (!atEdge) return void (last = performance.now());
+      }
       e.preventDefault();
       const now = performance.now();
       const fresh = now - last > 220; // la rueda llevaba un rato quieta: gesto nuevo

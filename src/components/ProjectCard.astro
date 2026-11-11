@@ -33,7 +33,7 @@ const num = String(index + 1).padStart(2, '0');
         ) : (
           <div class="card__placeholder" aria-hidden="true">
             <span class="card__ph-icon">{''}</span>
-            <span>// {t.projects.soon}</span>
+            <span>// {queued ? t.projects.soon : project.domain}</span>
             <span class="card__ph-bar"><span /></span>
           </div>
         )

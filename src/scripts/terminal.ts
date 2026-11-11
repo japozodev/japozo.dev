@@ -55,9 +55,9 @@ const TXT = {
       ['reboot', 'reinicia el sistema'],
       ['history · date · clear', 'lo de siempre'],
     ],
-    whoami: 'pozo, desarrollador frontend en Gijón. Ex técnico de hardware, ahora picando código.',
+    whoami: 'pozo, desarrollador web en Gijón. 20 años de técnico de seguridad y sistemas; ahora, del briefing al servidor.',
     readme:
-      'Construyo webs rápidas, cuidadas y con carácter.\nMás de 20 años de hardware me enseñaron a entender las cosas por dentro.\nAhora trabajo como frontend developer en @Kewo.',
+      'Diseño, desarrollo y pongo en producción webs en WordPress y Astro.\nAntes pasé 20 años como técnico de seguridad y sistemas, diez de encargado.\nAhora trabajo como desarrollador web en @Kewo.',
     themes: 'Temas disponibles (usa: tema &lt;nombre&gt;):',
     themeSet: (t: string) => `Tema cambiado a <span class="ok">${t}</span>.`,
     themeBad: (t: string) => `tema: '${t}' no existe.`,
@@ -96,9 +96,9 @@ const TXT = {
       ['reboot', 'restart the system'],
       ['history · date · clear', 'the usual'],
     ],
-    whoami: 'pozo, frontend developer in Gijón, Spain. Former hardware tech, now writing code.',
+    whoami: 'pozo, web developer in Gijón, Spain. 20 years as a security and systems tech; now, from brief to server.',
     readme:
-      "I build fast, polished websites with character.\n20+ years of hardware taught me how things work under the hood.\nI'm currently a frontend developer at @Kewo.",
+      "I design, build and ship WordPress and Astro websites.\nBefore that, 20 years as a security and systems technician, ten as a supervisor.\nI'm currently a web developer at @Kewo.",
     themes: 'Available themes (use: theme &lt;name&gt;):',
     themeSet: (t: string) => `Theme switched to <span class="ok">${t}</span>.`,
     themeBad: (t: string) => `theme: '${t}' not found.`,

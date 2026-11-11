@@ -285,8 +285,32 @@ html.cube .cube .hero__keys kbd:last-of-type {
 html.cube .cube #proyectos .sh__lead {
   display: none;
 }
+/* caben dos filas; el resto se alcanza con scroll dentro de la cara, fila a fila */
 html.cube .cube .projects {
   gap: 1.1rem 1.25rem;
+  /* dos filas exactas: 2 x alto de tarjeta + hueco + relleno superior */
+  max-height: calc(2 * 15.6rem + 1.1rem + 4px);
+  margin-right: -0.9rem;
+  padding: 4px 0.9rem 0 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scroll-snap-type: y mandatory;
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--accent) 60%, var(--border)) transparent;
+}
+html.cube .cube .projects .card {
+  height: 15.6rem;
+  scroll-snap-align: start;
+  scroll-margin-top: 4px;
+}
+html.cube .cube .projects__more {
+  display: block;
+  margin: 0.9rem 0 0;
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+html.cube .cube .projects__more b {
+  color: var(--accent);
 }
 html.cube .cube .card {
   gap: 0.6rem;
@@ -380,6 +404,10 @@ html.cube .cube .pkgs {
 /* ---------- cara 4: contacto ---------- */
 html.cube .cube .row dd {
   font-size: 1rem;
+}
+
+.projects__more {
+  display: none;
 }
 
 /* ---------- tapas ---------- */

@@ -1,5 +1,6 @@
 ---
-// Ventana estilo btop: las habilidades como gráficas de CPU y unos procesos de broma
+// Ventana estilo btop: lo que más corre en el día a día como gráficas de CPU (es
+// carga de trabajo, no nota de habilidad) y unos procesos de broma
 import type { Lang } from '../data/site';
 import Window from './Window.astro';
 
@@ -10,13 +11,12 @@ interface Props {
 const { lang } = Astro.props;
 const es = lang === 'es';
 
-// porcentajes de la web anterior
 const skills = [
-  { name: 'HTML / CSS', v: 95 },
-  { name: 'JavaScript', v: 85 },
-  { name: 'UI / UX', v: 80 },
-  { name: es ? 'Resolver problemas' : 'Problem solving', v: 85 },
-  { name: es ? 'Trabajo en equipo' : 'Teamwork', v: 75 },
+  { name: 'wordpress', v: 64 },
+  { name: 'html · css · js', v: 52 },
+  { name: es ? 'servidores' : 'servers', v: 38 },
+  { name: 'astro', v: 27 },
+  { name: 'backend [wip]', v: 9 },
 ];
 
 const procs = [
@@ -33,7 +33,7 @@ const spark = (v: number) =>
 <Window title="btop" class="tile tile--btop">
   <div class="btop" data-btop>
     <div class="btop__head">
-      <span><b>cpu</b> <span class="c-muted">{es ? 'habilidades' : 'skills'}</span></span>
+      <span><b>cpu</b> <span class="c-muted">{es ? 'día a día' : 'day to day'}</span></span>
       <span class="c-muted" data-btop-clock>--:--:--</span>
     </div>
     <ul class="btop__rows">

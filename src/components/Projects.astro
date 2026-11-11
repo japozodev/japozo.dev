@@ -19,6 +19,8 @@ const t = useTranslations(lang);
     <div class="projects">
       {PROJECTS.map((p, i) => <ProjectCard project={p} lang={lang} index={i} />)}
     </div>
+    <!-- aviso de que la lista sigue; solo se ve en el cubo -->
+    <p class="projects__more" aria-hidden="true"><b>↓</b> {t.projects.more.replace('{n}', String(PROJECTS.length))}</p>
   </div>
 </section>
 

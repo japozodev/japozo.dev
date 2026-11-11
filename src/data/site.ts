@@ -3,6 +3,11 @@ import iptopografia from '../assets/projects/iptopografia.png';
 import allianz from '../assets/projects/allianz.png';
 import r2r from '../assets/projects/r2r.png';
 
+// capturas opcionales: si el archivo existe en assets/projects se usa; si no, la
+// tarjeta muestra el dominio
+const shots = import.meta.glob<{ default: ImageMetadata }>('../assets/projects/*.{png,jpg}', { eager: true });
+const shot = (name: string) => (shots[`../assets/projects/${name}.png`] ?? shots[`../assets/projects/${name}.jpg`])?.default;
+
 export type Lang = 'es' | 'en';
 type Localized = Record<Lang, string>;
 
@@ -33,7 +38,6 @@ export interface Project {
   stack: string[];
 }
 
-// TODO: role, stack y year son provisionales, revisar con los datos reales
 export const PROJECTS: Project[] = [
   {
     slug: 'iptopografia',
@@ -44,11 +48,11 @@ export const PROJECTS: Project[] = [
     year: '2025',
     status: 'online',
     desc: {
-      es: 'Web corporativa para una empresa de topografía: servicios, proyectos y contacto en una experiencia clara y rápida.',
-      en: 'Corporate website for a land surveying company: services, projects and contact in a clear, fast experience.',
+      es: 'Web corporativa para una empresa de topografía, dentro del programa Kit Digital. Del briefing al dominio en producción: diseño, desarrollo, hosting y SEO.',
+      en: 'Corporate site for a land surveying company, part of the Kit Digital programme. From brief to live domain: design, build, hosting and SEO.',
     },
-    role: { es: 'Diseño + desarrollo', en: 'Design + development' },
-    stack: ['WordPress', 'Elementor', 'CSS'],
+    role: { es: 'Proyecto completo', en: 'End to end' },
+    stack: ['WordPress', 'Elementor', 'SEO'],
   },
   {
     slug: 'allianz',
@@ -59,11 +63,11 @@ export const PROJECTS: Project[] = [
     year: '2025',
     status: 'online',
     desc: {
-      es: 'Sitio corporativo para un agente de una compañía internacional de seguros y activos financieros.',
-      en: 'Corporate site for an agent of an international insurance and asset management company.',
+      es: 'Web para un agente de Allianz, dentro del Kit Digital. Diseño a partir del briefing, desarrollo, alta de dominio y hosting, migración a producción y SEO.',
+      en: 'Site for an Allianz agent, part of Kit Digital. Design from the brief, build, domain and hosting setup, migration to production and SEO.',
     },
-    role: { es: 'Diseño + desarrollo', en: 'Design + development' },
-    stack: ['WordPress', 'Elementor', 'JavaScript'],
+    role: { es: 'Proyecto completo', en: 'End to end' },
+    stack: ['WordPress', 'Elementor', 'SEO'],
   },
   {
     slug: 'r2r',
@@ -74,20 +78,50 @@ export const PROJECTS: Project[] = [
     year: '2025',
     status: 'online',
     desc: {
-      es: 'Desarrollo web para una consultoría especializada en servicios inmobiliarios integrales.',
-      en: 'Website for a consultancy specialised in end-to-end property services.',
+      es: 'Web para una consultoría inmobiliaria, dentro del Kit Digital. Me encargué de todo: diseño, desarrollo, servidor y puesta en producción.',
+      en: 'Site for a property consultancy, part of Kit Digital. I handled everything: design, build, server and go-live.',
     },
-    role: { es: 'Desarrollo frontend', en: 'Frontend development' },
-    stack: ['WordPress', 'CSS', 'JavaScript'],
+    role: { es: 'Proyecto completo', en: 'End to end' },
+    stack: ['WordPress', 'Elementor', 'Hosting'],
   },
   {
-    slug: 'proyecto-04',
-    name: 'proyecto_04',
+    slug: 'breoganocasion',
+    name: 'Breogán Ocasión',
+    domain: 'breoganocasion.com',
+    url: 'https://www.breoganocasion.com/',
+    image: shot('breoganocasion'),
+    year: '2026',
+    status: 'online',
+    desc: {
+      es: 'Portal de venta de coches de segunda mano. Empezó como un proyecto coral y sigue siendo un trabajo de equipo. Mi parte: darle forma, los plugins a medida, la integración de los formularios con el CRM y el mantenimiento. La 404, una pista de coches sin fin, también es mía.',
+      en: 'Used car sales portal. It started as a joint effort and is still teamwork. My part: shaping it, the custom plugins, the form integration with the CRM and the maintenance. The 404, an endless toy car track, is mine too.',
+    },
+    role: { es: 'Desarrollo y mantenimiento', en: 'Development and maintenance' },
+    stack: ['WordPress', 'Plugins a medida', 'CRM'],
+  },
+  {
+    slug: 'japozo',
+    name: 'japozo.dev',
+    domain: 'japozo.dev',
+    url: 'https://japozo.dev',
+    image: shot('japozo'),
+    year: '2026',
+    status: 'online',
+    desc: {
+      es: 'Este portfolio: un escritorio Linux con un cubo de workspaces al estilo Compiz, una terminal que funciona y una versión móvil que gira al deslizar. Astro, CSS 3D y JavaScript a mano.',
+      en: 'This portfolio: a Linux desktop with a Compiz-style workspace cube, a working terminal and a mobile version that spins as you swipe. Astro, 3D CSS and hand-written JavaScript.',
+    },
+    role: { es: 'Idea, diseño y desarrollo', en: 'Concept, design and development' },
+    stack: ['Astro', 'CSS 3D', 'JavaScript'],
+  },
+  {
+    slug: 'proyecto-06',
+    name: 'proyecto_06',
     year: '2026',
     status: 'queued',
     desc: {
-      es: 'Hueco reservado para el próximo proyecto destacado. Compilando...',
-      en: 'Slot reserved for the next featured project. Compiling...',
+      es: 'Hueco reservado para el próximo proyecto. Compilando...',
+      en: 'Slot reserved for the next project. Compiling...',
     },
     role: { es: 'Por definir', en: 'TBD' },
     stack: ['???'],
@@ -96,15 +130,18 @@ export const PROJECTS: Project[] = [
 
 // Salida estilo `pacman -Q`
 export const STACK = [
-  { pkg: 'html5', ver: 'living-std', icon: '' },
-  { pkg: 'css3', ver: 'nesting+grid', icon: '' },
-  { pkg: 'javascript', ver: 'es2025', icon: '' },
-  { pkg: 'astro', ver: '7.x', icon: '' },
   { pkg: 'wordpress', ver: '6.x', icon: '' },
   { pkg: 'elementor', ver: 'pro', icon: '' },
+  { pkg: 'astro', ver: '7.x', icon: '' },
+  { pkg: 'javascript', ver: 'es2025', icon: '' },
+  { pkg: 'html5', ver: 'living-std', icon: '' },
+  { pkg: 'css3', ver: 'nesting+grid', icon: '' },
+  { pkg: 'tailwind', ver: '4.x', icon: '' },
   { pkg: 'bootstrap', ver: '5.x', icon: '' },
-  { pkg: 'git', ver: '2.x', icon: '' },
-  { pkg: 'github', ver: 'cli', icon: '' },
+  { pkg: 'plesk', ver: 'obsidian', icon: '' },
+  { pkg: 'docker', ver: 'compose', icon: '' },
+  { pkg: 'redis', ver: 'cache', icon: '' },
+  { pkg: 'cloudflare', ver: 'cdn+dns', icon: '' },
 ];
 
 // Salida estilo `git log --oneline`
@@ -116,15 +153,19 @@ export const TIMELINE: { hash: string; tag?: string; msg: Localized }[] = [
   },
   {
     hash: '9c41b2e',
-    msg: { es: 'feat: frontend developer en @Kewo', en: 'feat: frontend developer at @Kewo' },
+    msg: { es: 'feat: desarrollador web en @Kewo tras las prácticas', en: 'feat: web developer at @Kewo after the internship' },
+  },
+  {
+    hash: '7d3e9a1',
+    msg: { es: 'feat: ciclo superior de desarrollo web, 3 años a la vez que el trabajo', en: 'feat: web development degree, 3 years alongside the job' },
   },
   {
     hash: '5e8d1ec',
-    msg: { es: 'refactor: cambio de rumbo hacia el desarrollo web', en: 'refactor: career switch to web development' },
+    msg: { es: 'refactor: 10 años de encargado en Viserco (proyectos y clientes)', en: 'refactor: 10 years as supervisor at Viserco (projects and clients)' },
   },
   {
     hash: '0000001',
     tag: 'v1.0',
-    msg: { es: 'init: +20 años trabajando con hardware', en: 'init: 20+ years working with hardware' },
+    msg: { es: 'init: técnico de seguridad y sistemas', en: 'init: security and systems technician' },
   },
 ];
