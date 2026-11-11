@@ -102,15 +102,15 @@
   --surface-2: #e6e9ef;
   --border: #ccd0da;
   --fg: #3c3f55;
-  --muted: #6c6f85;
-  --accent: #2e8a1f;
-  --accent-2: #137f86;
+  --muted: #5f6277;
+  --accent: #23751a;
+  --accent-2: #0f7379;
   --accent-ink: #ffffff;
-  --info: #1e66f5;
-  --warn: #c56a08;
+  --info: #1b5fe0;
+  --warn: #a35704;
   --danger: #d20f39;
   --magenta: #8839ef;
-  --glow: rgb(46 138 31 / 0.2);
+  --glow: rgb(35 117 26 / 0.2);
 }
 
 /* ---------- BASE ---------- */

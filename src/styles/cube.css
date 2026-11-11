@@ -69,6 +69,17 @@ html.cube .cube {
   transform: translateZ(calc(var(--face) / -2));
   will-change: transform;
 }
+/* los envoltorios comparten plano con la cara frontal y, tras girar, se quedaban
+   con los clicks: solo las caras reciben el puntero */
+html.cube .stage,
+html.cube .cube-tilt,
+html.cube .cube {
+  pointer-events: none;
+}
+html.cube .cube > section,
+html.cube .cube > .lid {
+  pointer-events: auto;
+}
 html.cube-drag,
 html.cube-drag * {
   cursor: grabbing !important;
@@ -82,7 +93,9 @@ html.cube .cube > .lid {
   inset: 0;
   margin: 0;
   min-height: 0;
-  overflow: hidden;
+  /* sin recorte: Chrome deja de detectar clicks en las caras giradas si recortan,
+     y el contenido ya está maquetado para caber */
+  overflow: visible;
   /* cristal ahumado: se ve el interior del cubo y las caras de detrás */
   background-color: color-mix(in srgb, var(--bg) 22%, transparent);
   border: var(--win-border) solid color-mix(in srgb, var(--accent) 65%, var(--border));

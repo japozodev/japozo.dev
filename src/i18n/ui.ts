@@ -9,7 +9,7 @@ export const ui = {
       description:
         'Portfolio de J. A. Pozo, desarrollador frontend en Gijón. Webs rápidas, cuidadas y con carácter: Astro, JavaScript, WordPress y mucho terminal.',
     },
-    nav: { home: 'inicio', projects: 'proyectos', about: 'sobre-mí', contact: 'contacto' },
+    nav: { home: 'inicio', projects: 'proyectos', about: 'sobre-mí', contact: 'contacto', label: 'Workspaces' },
     skip: 'Saltar al contenido',
     theme: 'Tema',
     switchLang: 'Read in English',
@@ -47,6 +47,7 @@ export const ui = {
       role: 'rol',
       stack: 'stack',
       soon: 'próximamente',
+      shotAlt: 'Captura de la web de {name}',
     },
     about: {
       title: 'Sobre mí',
@@ -75,7 +76,7 @@ export const ui = {
       description:
         'Portfolio of J. A. Pozo, frontend developer based in Gijón, Spain. Fast, polished websites with character: Astro, JavaScript, WordPress and plenty of terminal.',
     },
-    nav: { home: 'home', projects: 'projects', about: 'about', contact: 'contact' },
+    nav: { home: 'home', projects: 'projects', about: 'about', contact: 'contact', label: 'Workspaces' },
     skip: 'Skip to content',
     theme: 'Theme',
     switchLang: 'Leer en español',
@@ -113,6 +114,7 @@ export const ui = {
       role: 'role',
       stack: 'stack',
       soon: 'coming soon',
+      shotAlt: 'Screenshot of the {name} website',
     },
     about: {
       title: 'About me',

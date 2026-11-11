@@ -47,7 +47,7 @@ const year = new Date().getFullYear();
       </div>
     </div>
     <!-- en modo cubo la terminal y btop se sacan aquí, como ventanas del escritorio -->
-    <aside class="dock" id="dock"></aside>
+    <aside class="dock" id="dock" aria-label="Terminal"></aside>
   </main>
   <script is:inline>
     if (document.documentElement.classList.contains('cube')) document.getElementById('dock').append(document.querySelector('.desktop'));
