@@ -139,11 +139,12 @@ const t = useTranslations(lang);
   }
   .hero__cursor {
     display: inline-block;
-    width: 0.5em;
-    height: 0.85em;
-    margin-left: 0.08em;
-    background: var(--accent);
-    vertical-align: -0.05em;
+    /* bloque macizo, pero estrecho y algo translúcido para que no pese más que el nombre */
+    width: 0.135em;
+    height: 0.82em;
+    margin-left: 0.1em;
+    background: color-mix(in srgb, var(--accent) 70%, transparent);
+    vertical-align: -0.02em;
     animation: blink 1.1s steps(1) infinite;
   }
   .hero__role {

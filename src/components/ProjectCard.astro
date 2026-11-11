@@ -59,7 +59,7 @@ const num = String(index + 1).padStart(2, '0');
         )
       }
     </h3>
-    <p class="card__desc prose">{project.desc[lang]}</p>
+    <p class="card__desc prose" data-name={project.domain ?? project.name}>{project.desc[lang]}</p>
     <dl class="card__meta">
       <div><dt>{t.projects.role}</dt><dd>{project.role[lang]}</dd></div>
       <div>

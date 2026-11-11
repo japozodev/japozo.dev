@@ -351,22 +351,32 @@ html.cube .cube .card__meta div {
 html.cube .cube .tag {
   font-size: 0.68rem;
 }
-/* la descripción aparece sobre la captura al pasar el ratón */
+/* la descripción aparece al pasar el ratón tapando la tarjeta entera, con el nombre
+   arriba: así cabe el texto más largo sin salirse */
 html.cube .cube .card__desc {
   position: absolute;
-  inset: var(--win-border) var(--win-border) auto;
-  height: calc(12rem - 2 * var(--win-border));
+  inset: 0;
   display: flex;
-  align-items: flex-end;
-  padding: 1rem;
-  border-radius: calc(var(--radius) - var(--win-border));
-  background: color-mix(in srgb, var(--bg) 90%, transparent);
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1rem 1.1rem;
+  border: var(--win-border) solid var(--accent);
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--bg) 94%, transparent);
   color: var(--fg);
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   line-height: 1.5;
+  text-wrap: pretty;
   opacity: 0;
-  transform: translateY(-4px);
   transition: opacity 0.25s;
+}
+html.cube .cube .card__desc::before {
+  content: attr(data-name);
+  font-family: var(--font);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--accent);
 }
 html.cube .cube .card:hover .card__desc,
 html.cube .cube .card:focus-within .card__desc {
