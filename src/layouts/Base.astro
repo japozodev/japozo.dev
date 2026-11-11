@@ -2,6 +2,7 @@
 import '@fontsource-variable/fira-code/wght.css';
 import '../styles/global.css';
 import '../styles/cube.css';
+import '../styles/swipe.css';
 import type { Lang } from '../data/site';
 import { SITE, SOCIAL } from '../data/site';
 import { DEFAULT_THEME, THEME_KEY } from '../data/themes';
@@ -64,8 +65,10 @@ const jsonLd = {
     <script is:inline define:vars={{ THEME_KEY }}>
       const root = document.documentElement;
       root.classList.add('js');
-      // cubo de workspaces (ver scripts/workspaces.ts)
-      if (matchMedia('(min-width: 1100px) and (min-height: 560px) and (prefers-reduced-motion: no-preference)').matches) root.classList.add('cube');
+      // cubo de workspaces en escritorio, caras deslizables en el resto (ver scripts/workspaces.ts)
+      if (matchMedia('(prefers-reduced-motion: no-preference)').matches) {
+        root.classList.add(matchMedia('(min-width: 1100px) and (min-height: 560px)').matches ? 'cube' : 'swipe');
+      }
       let theme = null;
       try { theme = localStorage.getItem(THEME_KEY); } catch {}
       if (!theme && matchMedia('(prefers-color-scheme: light)').matches) theme = 'latte';

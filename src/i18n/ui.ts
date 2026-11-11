@@ -20,6 +20,7 @@ export const ui = {
       lead: 'Construyo webs rápidas, cuidadas y con carácter. Más de 20 años entre hardware y sistemas me enseñaron a entender cómo funcionan las cosas por dentro; ahora lo aplico al código.',
       ctaProjects: 'ver proyectos',
       ctaContact: 'hablemos',
+      swipe: 'desliza para girar el cubo',
       keys: ['girar', 'workspace', 'tapas', 'arrastrar', 'rotación libre'],
     },
     terminal: {
@@ -88,6 +89,7 @@ export const ui = {
       lead: 'I build fast, polished websites with character. Over 20 years in hardware and systems taught me how things work under the hood; now I bring that to code.',
       ctaProjects: 'see projects',
       ctaContact: "let's talk",
+      swipe: 'swipe to spin the cube',
       keys: ['spin', 'workspace', 'lids', 'drag', 'free rotation'],
     },
     terminal: {

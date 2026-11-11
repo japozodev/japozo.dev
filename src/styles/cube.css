@@ -85,8 +85,8 @@ html.cube .cube-tilt,
 html.cube .cube {
   pointer-events: none;
 }
-html.cube .cube > section,
-html.cube .cube > .lid {
+html.cube .cube > .face > section,
+html.cube .cube > .face > .lid {
   pointer-events: auto;
 }
 html.cube-drag,
@@ -96,8 +96,12 @@ html.cube-drag * {
 }
 
 /* ---------- caras ---------- */
-html.cube .cube > section,
-html.cube .cube > .lid {
+/* envoltorio de cada cara: aquí no genera caja, la cara cuelga directamente del cubo */
+.face {
+  display: contents;
+}
+html.cube .cube > .face > section,
+html.cube .cube > .face > .lid {
   position: absolute;
   inset: 0;
   margin: 0;
@@ -112,16 +116,16 @@ html.cube .cube > .lid {
   transition: background-color 0.5s, border-color 0.5s, box-shadow 0.5s;
   outline: none;
 }
-html.cube .cube > section:nth-of-type(1) { transform: rotateY(0deg) translateZ(calc(var(--face) / 2)); }
-html.cube .cube > section:nth-of-type(2) { transform: rotateY(90deg) translateZ(calc(var(--face) / 2)); }
-html.cube .cube > section:nth-of-type(3) { transform: rotateY(180deg) translateZ(calc(var(--face) / 2)); }
-html.cube .cube > section:nth-of-type(4) { transform: rotateY(270deg) translateZ(calc(var(--face) / 2)); }
-html.cube .cube > .lid--top { transform: rotateX(90deg) translateZ(calc(var(--face) / 2)); }
-html.cube .cube > .lid--bottom { transform: rotateX(-90deg) translateZ(calc(var(--face) / 2)); }
+html.cube .cube > .face:nth-child(1) > section { transform: rotateY(0deg) translateZ(calc(var(--face) / 2)); }
+html.cube .cube > .face:nth-child(2) > section { transform: rotateY(90deg) translateZ(calc(var(--face) / 2)); }
+html.cube .cube > .face:nth-child(3) > section { transform: rotateY(180deg) translateZ(calc(var(--face) / 2)); }
+html.cube .cube > .face:nth-child(4) > section { transform: rotateY(270deg) translateZ(calc(var(--face) / 2)); }
+html.cube .cube > .face > .lid--top { transform: rotateX(90deg) translateZ(calc(var(--face) / 2)); }
+html.cube .cube > .face > .lid--bottom { transform: rotateX(-90deg) translateZ(calc(var(--face) / 2)); }
 
 /* escuadras en las esquinas de cada cara */
-html.cube .cube > section::after,
-html.cube .cube > .lid::after {
+html.cube .cube > .face > section::after,
+html.cube .cube > .face > .lid::after {
   content: '';
   position: absolute;
   inset: 0.6rem;
@@ -143,25 +147,25 @@ html.cube .cube > .lid::after {
 }
 
 /* el contenido de las caras que no están delante queda atenuado */
-html.cube .cube > section > *,
-html.cube .cube > .lid > * {
+html.cube .cube > .face > section > *,
+html.cube .cube > .face > .lid > * {
   opacity: 0.22;
   transition: opacity 0.5s;
 }
-html.cube .cube > .is-front > *,
-html.cube[data-spin] .cube > section > *,
-html.cube[data-spin] .cube > .lid > * {
+html.cube .cube > .face > .is-front > *,
+html.cube[data-spin] .cube > .face > section > *,
+html.cube[data-spin] .cube > .face > .lid > * {
   opacity: 1;
 }
 /* cara activa: más opaca para leer bien y con el borde en degradado de Hyprland */
-html.cube .cube > .is-front {
+html.cube .cube > .face > .is-front {
   background-color: color-mix(in srgb, var(--bg) 70%, transparent);
   border-image: linear-gradient(45deg, var(--accent), var(--accent-2)) 1;
   box-shadow: 0 0 44px -14px var(--glow);
 }
 /* mientras gira: todas iguales y con las aristas encendidas */
-html.cube[data-spin] .cube > section,
-html.cube[data-spin] .cube > .lid {
+html.cube[data-spin] .cube > .face > section,
+html.cube[data-spin] .cube > .face > .lid {
   background-color: color-mix(in srgb, var(--bg) 62%, transparent);
   border-color: color-mix(in srgb, var(--accent) 80%, var(--border));
   box-shadow: none;
@@ -177,7 +181,7 @@ html.cube .cube .reveal {
 html.cube .cube .container {
   width: 100%;
 }
-html.cube .cube > .section {
+html.cube .cube > .face > .section {
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -203,14 +207,14 @@ html.cube .cube .sh__typed {
   width: 0;
   animation: none;
 }
-html.cube .cube > .is-front .sh__typed {
+html.cube .cube > .face > .is-front .sh__typed {
   animation:
     type 0.7s steps(var(--n)) 0.45s forwards,
     caret 1s steps(1) 1.15s infinite;
 }
 
 /* ---------- cara 1: inicio ---------- */
-html.cube .cube > .hero {
+html.cube .cube > .face > .hero {
   display: block;
   padding: 0;
 }

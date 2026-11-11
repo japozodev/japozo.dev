@@ -24,23 +24,29 @@ const year = new Date().getFullYear();
   <main id="main">
     <div class="stage">
       <div class="cube-tilt" id="cube-tilt">
+        <!-- cada cara va en un .face: en el cubo no pinta caja (display: contents) y en
+             móvil es el hueco fijo que se desliza mientras la sección gira dentro -->
         <div class="cube" id="cube">
-          <Hero lang={lang} />
-          <Projects lang={lang} />
-          <About lang={lang} />
-          <Contact lang={lang} />
+          <div class="face"><Hero lang={lang} /></div>
+          <div class="face"><Projects lang={lang} /></div>
+          <div class="face"><About lang={lang} /></div>
+          <div class="face"><Contact lang={lang} /></div>
           <!-- tapas del cubo: decorativas, solo existen en modo cubo -->
-          <div class="lid lid--top" aria-hidden="true">
-            <div class="lid__in">
-              <pre class="lid__logo">{LOGO}</pre>
-              <p>japozo.dev <span class="c-accent">v27</span></p>
+          <div class="face face--lid">
+            <div class="lid lid--top" aria-hidden="true">
+              <div class="lid__in">
+                <pre class="lid__logo">{LOGO}</pre>
+                <p>japozo.dev <span class="c-accent">v27</span></p>
+              </div>
             </div>
           </div>
-          <div class="lid lid--bottom" aria-hidden="true">
-            <div class="lid__in">
-              <p class="lid__exit">exit 0</p>
-              <p>© {year} J. A. Pozo</p>
-              <p class="c-muted">{t.footer.made}</p>
+          <div class="face face--lid">
+            <div class="lid lid--bottom" aria-hidden="true">
+              <div class="lid__in">
+                <p class="lid__exit">exit 0</p>
+                <p>© {year} J. A. Pozo</p>
+                <p class="c-muted">{t.footer.made}</p>
+              </div>
             </div>
           </div>
         </div>
