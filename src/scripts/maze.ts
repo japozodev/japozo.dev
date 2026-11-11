@@ -3,8 +3,6 @@
 // lleva el rótulo SALIDA y hace de botón de volver al inicio: al cruzarla se navega
 // a la portada.
 
-const W = 320;
-const H = 180;
 const TEX = 64;
 const FOV = 0.66;
 const MOVE = 2.7; // casillas por segundo
@@ -32,8 +30,28 @@ export function initMaze(root: HTMLElement, home: string, doorLabel: string) {
   const canvas = root.querySelector<HTMLCanvasElement>('canvas');
   const ctx = canvas?.getContext('2d');
   if (!canvas || !ctx) return;
-  // píxeles nítidos al ampliar las texturas
-  ctx.imageSmoothingEnabled = false;
+
+  // resolución interna: apaisada en escritorio y con el móvil tumbado; cuadrada con
+  // el móvil en vertical, para aprovechar el ancho. WALL corrige el alto de las
+  // paredes para que el pasillo se vea igual en los dos formatos.
+  let W = 320;
+  let H = 180;
+  let WALL = 0.7425;
+  if (matchMedia('(pointer: coarse)').matches) root.classList.add('is-touch');
+  const portrait = matchMedia('(orientation: portrait)');
+  const resize = () => {
+    const square = root.classList.contains('is-touch') && portrait.matches;
+    W = square ? 240 : 320;
+    H = square ? 240 : 180;
+    WALL = square ? 1 : 0.7425;
+    canvas.width = W;
+    canvas.height = H;
+    // píxeles nítidos al ampliar las texturas (cambiar el tamaño reinicia el contexto)
+    ctx.imageSmoothingEnabled = false;
+  };
+  resize();
+  portrait.addEventListener('change', resize);
+  root.addEventListener('maze:resize', resize);
 
   // --- texturas: se regeneran con el tema ---
   let bg = '#121416';
@@ -203,7 +221,7 @@ export function initMaze(root: HTMLElement, home: string, doorLabel: string) {
         if (hit === '#' || hit === 'D') break;
       }
       const dist = Math.max(0.05, side === 0 ? sdx - ddx : sdy - ddy);
-      const h = H / dist;
+      const h = ((W / 2 / FOV) * WALL) / dist;
       let wx = side === 0 ? p.y + dist * ry : p.x + dist * rx;
       wx -= Math.floor(wx);
       let tx = Math.floor(wx * TEX);

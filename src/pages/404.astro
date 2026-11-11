@@ -23,6 +23,17 @@ import Base from '../layouts/Base.astro';
     <div class="maze__view">
       <canvas width="320" height="180" tabindex="0" aria-label="Laberinto en primera persona. La salida lleva al inicio."></canvas>
       <p class="maze__out" aria-hidden="true" data-en="exit found">salida encontrada</p>
+      <!-- mando táctil, superpuesto a la vista: girar a la izquierda, avanzar a la derecha -->
+      <div class="maze__pad" aria-hidden="true">
+        <div>
+          <button type="button" data-move="left" tabindex="-1">◀</button>
+          <button type="button" data-move="right" tabindex="-1">▶</button>
+        </div>
+        <div>
+          <button type="button" data-move="back" tabindex="-1">▼</button>
+          <button type="button" data-move="fwd" tabindex="-1">▲</button>
+        </div>
+      </div>
     </div>
 
     <section class="maze__msg">
@@ -37,13 +48,6 @@ import Base from '../layouts/Base.astro';
         <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd>
         <span data-en="or the arrows to move · drag to look around">o las flechas para moverte · arrastra para girar</span>
       </p>
-      <!-- mando táctil -->
-      <div class="maze__pad" aria-hidden="true">
-        <button type="button" data-move="left" tabindex="-1">◀</button>
-        <button type="button" data-move="fwd" tabindex="-1">▲</button>
-        <button type="button" data-move="back" tabindex="-1">▼</button>
-        <button type="button" data-move="right" tabindex="-1">▶</button>
-      </div>
     </section>
   </main>
 </Base>
@@ -53,9 +57,12 @@ import Base from '../layouts/Base.astro';
     display: grid;
     grid-template-rows: auto minmax(0, 1fr) auto;
     gap: 0.9rem;
-    /* body reserva abajo el alto de la barra tmux, que aquí no existe */
-    min-height: calc(100dvh - var(--statusbar-h));
+    min-height: 100dvh;
     padding: 0.9rem clamp(0.9rem, 3vw, 2rem) 0.5rem;
+  }
+  /* body reserva abajo el alto de la barra tmux, que aquí no existe */
+  :global(body:has(.maze)) {
+    padding-bottom: 0;
   }
   .maze__bar {
     display: flex;
@@ -169,35 +176,80 @@ import Base from '../layouts/Base.astro';
     margin-left: 0.4rem;
   }
   .maze__pad {
+    position: absolute;
+    inset: auto 0.6rem 0.6rem;
+    z-index: 2;
     display: none;
-    gap: 0.5rem;
+    justify-content: space-between;
+    pointer-events: none;
+  }
+  .maze__pad div {
+    display: flex;
+    gap: 0.45rem;
+    pointer-events: auto;
   }
   .maze__pad button {
-    width: 3.5rem;
-    height: 3.5rem;
-    border: 1px solid color-mix(in srgb, var(--accent) 55%, var(--border));
+    width: 3.3rem;
+    height: 3.3rem;
+    border: 1px solid color-mix(in srgb, var(--accent) 60%, transparent);
     border-radius: 8px;
-    background: var(--surface);
+    background: color-mix(in srgb, var(--bg) 70%, transparent);
     color: var(--accent);
     font: inherit;
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     touch-action: none;
     user-select: none;
+    -webkit-user-select: none;
   }
   .maze__pad button:active {
     background: var(--accent);
     color: var(--accent-ink);
   }
-  /* pantallas táctiles: mando en lugar de teclas */
-  @media (pointer: coarse) {
-    .maze__pad {
-      display: flex;
+
+  /* pantallas táctiles (maze.ts pone .is-touch): la vista manda y el mando va encima */
+  .is-touch .maze__pad {
+    display: flex;
+  }
+  .is-touch .maze__keys {
+    display: none;
+  }
+  /* móvil en vertical: vista cuadrada a todo el ancho */
+  @media (orientation: portrait) {
+    .is-touch.maze {
+      grid-template-rows: auto auto 1fr;
+      padding-inline: 0.75rem;
     }
-    .maze__keys {
-      display: none;
+    .is-touch .maze__view {
+      align-self: start;
+      width: min(100%, calc(100dvh - 15rem));
     }
-    .maze__view {
-      width: min(100%, calc((100dvh - 21rem) * 16 / 9));
+    .is-touch .maze__view canvas {
+      aspect-ratio: 1;
+    }
+    .is-touch .maze__msg {
+      align-content: start;
+    }
+  }
+  /* móvil tumbado: solo la barra y la vista, tan grande como quepa */
+  @media (orientation: landscape) {
+    .is-touch.maze {
+      grid-template-rows: auto minmax(0, 1fr);
+      gap: 0.5rem;
+      padding-block: 0.4rem;
+    }
+    .is-touch .maze__bar {
+      padding-bottom: 0.35rem;
+    }
+    .is-touch .maze__view {
+      width: min(100%, calc((100dvh - 3.6rem) * 16 / 9));
+    }
+    /* el texto queda solo para lectores de pantalla */
+    .is-touch .maze__msg {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
     }
   }
 </style>
