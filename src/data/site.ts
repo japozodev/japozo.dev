@@ -35,7 +35,8 @@ export interface Project {
   status: 'online' | 'queued';
   desc: Localized;
   role: Localized;
-  stack: string[];
+  /** etiquetas; las que cambian con el idioma van localizadas */
+  stack: (string | Localized)[];
 }
 
 export const PROJECTS: Project[] = [
@@ -97,7 +98,7 @@ export const PROJECTS: Project[] = [
       en: 'Used car sales portal. It started as a joint effort and is still teamwork. My part: shaping it, the custom plugins, the form integration with the CRM and the maintenance. The 404, an endless toy car track, is mine too.',
     },
     role: { es: 'Desarrollo y mantenimiento', en: 'Development and maintenance' },
-    stack: ['WordPress', 'Plugins a medida', 'CRM'],
+    stack: ['WordPress', { es: 'Plugins a medida', en: 'Custom plugins' }, 'CRM'],
   },
   {
     slug: 'japozo',

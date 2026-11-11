@@ -64,7 +64,7 @@ const num = String(index + 1).padStart(2, '0');
       <div><dt>{t.projects.role}</dt><dd>{project.role[lang]}</dd></div>
       <div>
         <dt>{t.projects.stack}</dt>
-        <dd class="tags">{project.stack.map((s) => <span class="tag">{s}</span>)}</dd>
+        <dd class="tags">{project.stack.map((s) => <span class="tag">{typeof s === 'string' ? s : s[lang]}</span>)}</dd>
       </div>
     </dl>
     {

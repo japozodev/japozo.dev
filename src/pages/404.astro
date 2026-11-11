@@ -1,0 +1,220 @@
+---
+// 404: un laberinto en primera persona (ver scripts/maze.ts). La puerta de salida
+// es el botón de volver al inicio. Una sola página para los dos idiomas: el texto
+// en inglés va en data-en y se cambia en el cliente si la ruta empieza por /en o
+// lleva ?lang=en.
+import Base from '../layouts/Base.astro';
+---
+
+<Base lang="es" title="404 · Te has perdido | japozo.dev" noindex>
+  <script is:inline>
+    // esta página no usa el cubo: fuera las clases que pone Base
+    document.documentElement.classList.remove('cube', 'swipe');
+    if (location.pathname.startsWith('/en') || new URLSearchParams(location.search).get('lang') === 'en') document.documentElement.lang = 'en';
+  </script>
+  <main id="main" class="maze">
+    <header class="maze__bar">
+      <span class="maze__brand">japozo</span>
+      <span class="maze__path" id="maze-path">GET ? 404</span>
+      <!-- salida sin jugar: enlaces rotos, lectores de pantalla y prisas -->
+      <a class="maze__skip" href="/" data-href-en="/en/" data-en="skip the maze →">saltar el laberinto →</a>
+    </header>
+
+    <div class="maze__view">
+      <canvas width="320" height="180" tabindex="0" aria-label="Laberinto en primera persona. La salida lleva al inicio."></canvas>
+      <p class="maze__out" aria-hidden="true" data-en="exit found">salida encontrada</p>
+    </div>
+
+    <section class="maze__msg">
+      <h1>
+        <span class="c-accent">404</span>{' '}
+        <span data-en="you are lost">te has perdido</span>
+      </h1>
+      <p data-en="This page does not exist, but the way out does: find the door marked EXIT and walk through it to get back home.">
+        Esta página no existe, pero la salida sí: busca la puerta con el rótulo SALIDA y crúzala para volver al inicio.
+      </p>
+      <p class="maze__keys" aria-hidden="true">
+        <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd>
+        <span data-en="or the arrows to move · drag to look around">o las flechas para moverte · arrastra para girar</span>
+      </p>
+      <!-- mando táctil -->
+      <div class="maze__pad" aria-hidden="true">
+        <button type="button" data-move="left" tabindex="-1">◀</button>
+        <button type="button" data-move="fwd" tabindex="-1">▲</button>
+        <button type="button" data-move="back" tabindex="-1">▼</button>
+        <button type="button" data-move="right" tabindex="-1">▶</button>
+      </div>
+    </section>
+  </main>
+</Base>
+
+<style>
+  .maze {
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    gap: 0.9rem;
+    /* body reserva abajo el alto de la barra tmux, que aquí no existe */
+    min-height: calc(100dvh - var(--statusbar-h));
+    padding: 0.9rem clamp(0.9rem, 3vw, 2rem) 0.5rem;
+  }
+  .maze__bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem 1.25rem;
+    padding-bottom: 0.7rem;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.8rem;
+  }
+  .maze__brand {
+    font-weight: 700;
+  }
+  .maze__brand::after {
+    content: '>';
+    color: var(--accent);
+  }
+  .maze__path {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--muted);
+  }
+  .maze__skip {
+    color: var(--muted);
+    text-decoration: none;
+  }
+  .maze__skip:hover {
+    color: var(--accent);
+  }
+
+  /* la vista 16:9, tan grande como quepa con el mensaje debajo */
+  .maze__view {
+    position: relative;
+    align-self: center;
+    width: min(100%, calc((100dvh - 19.5rem) * 16 / 9));
+    margin-inline: auto;
+    border: var(--win-border) solid color-mix(in srgb, var(--accent) 55%, var(--border));
+  }
+  .maze__view canvas {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    image-rendering: pixelated;
+    cursor: grab;
+    touch-action: none;
+    outline-offset: 4px;
+  }
+  /* líneas de barrido */
+  .maze__view::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(to bottom, transparent 0 2px, rgb(0 0 0 / 0.22) 2px 3px);
+    pointer-events: none;
+  }
+  /* al cruzar la puerta la pantalla se enciende en verde */
+  .maze__out {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    display: grid;
+    place-items: center;
+    margin: 0;
+    background: var(--accent);
+    color: var(--accent-ink);
+    font-size: clamp(1rem, 3vw, 2rem);
+    font-weight: 700;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.5s;
+  }
+  :global(.is-out) .maze__out {
+    opacity: 1;
+  }
+
+  .maze__msg {
+    display: grid;
+    justify-items: center;
+    gap: 0.55rem;
+    text-align: center;
+  }
+  .maze__msg h1 {
+    font-size: clamp(1.4rem, 1rem + 2.4vw, 2.4rem);
+    letter-spacing: -0.02em;
+  }
+  .maze__msg p {
+    max-width: 62ch;
+    margin: 0;
+    color: var(--muted);
+  }
+  .maze__keys {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.3rem;
+    font-size: 0.78rem;
+  }
+  .maze__keys kbd {
+    padding: 0.05rem 0.45rem;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: var(--surface);
+    color: var(--fg);
+    font: inherit;
+  }
+  .maze__keys span {
+    margin-left: 0.4rem;
+  }
+  .maze__pad {
+    display: none;
+    gap: 0.5rem;
+  }
+  .maze__pad button {
+    width: 3.5rem;
+    height: 3.5rem;
+    border: 1px solid color-mix(in srgb, var(--accent) 55%, var(--border));
+    border-radius: 8px;
+    background: var(--surface);
+    color: var(--accent);
+    font: inherit;
+    font-size: 1.2rem;
+    touch-action: none;
+    user-select: none;
+  }
+  .maze__pad button:active {
+    background: var(--accent);
+    color: var(--accent-ink);
+  }
+  /* pantallas táctiles: mando en lugar de teclas */
+  @media (pointer: coarse) {
+    .maze__pad {
+      display: flex;
+    }
+    .maze__keys {
+      display: none;
+    }
+    .maze__view {
+      width: min(100%, calc((100dvh - 21rem) * 16 / 9));
+    }
+  }
+</style>
+
+<script>
+  import { initMaze } from '../scripts/maze';
+
+  const en = document.documentElement.lang === 'en';
+  if (en) {
+    document.querySelectorAll<HTMLElement>('[data-en]').forEach((el) => (el.textContent = el.dataset.en!));
+    document.querySelectorAll<HTMLAnchorElement>('[data-href-en]').forEach((a) => (a.href = a.dataset.hrefEn!));
+    document.querySelector('.maze canvas')?.setAttribute('aria-label', 'First-person maze. The exit takes you home.');
+  }
+
+  const path = document.getElementById('maze-path');
+  if (path) path.textContent = `GET ${location.pathname} → 404`;
+
+  const maze = document.querySelector<HTMLElement>('.maze');
+  if (maze) initMaze(maze, en ? '/en/' : '/', en ? 'EXIT' : 'SALIDA');
+</script>

@@ -125,7 +125,7 @@ export const ui = {
     about: {
       title: 'About me',
       p1: 'A computer geek since I was a kid: my dad was an electrician and I grew up taking PCs apart. I spent 20 years as a security and systems technician, the last ten as a supervisor at Viserco.',
-      p2: 'I earned a web development degree over three years while working full time and raising a kid. I interned at Kewo and stayed. I sweat the details, try to deliver a bit more than asked, and always save some creativity for the 404.',
+      p2: 'I earned a web development degree in three years while working full time and raising a kid. I interned at Kewo and stayed. I sweat the details, deliver a bit more than asked and save some creativity for the 404.',
       stackTitle: 'what I use daily',
       logTitle: 'history',
       photoAlt: 'Photo of J. A. Pozo',

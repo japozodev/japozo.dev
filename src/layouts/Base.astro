@@ -12,9 +12,12 @@ import { getImage } from 'astro:assets';
 
 interface Props {
   lang: Lang;
+  /** título propio (páginas que no son la portada, como la 404) */
+  title?: string;
+  noindex?: boolean;
 }
 
-const { lang } = Astro.props;
+const { lang, title, noindex = false } = Astro.props;
 const t = useTranslations(lang);
 const canonical = new URL(pathFor(lang), Astro.site);
 // TODO: sustituir por una imagen social propia de 1200x630
@@ -38,7 +41,8 @@ const jsonLd = {
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{t.meta.title}</title>
+    <title>{title ?? t.meta.title}</title>
+    {noindex && <meta name="robots" content="noindex" />}
     <meta name="description" content={t.meta.description} />
     <meta name="author" content={SITE.name} />
     <link rel="canonical" href={canonical} />

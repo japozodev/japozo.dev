@@ -52,6 +52,7 @@ const TXT = {
       ['cmatrix · cava', 'efectos (cualquier tecla para salir)'],
       ['hyprctl', 'ajusta el escritorio en vivo'],
       ['lang en', 'switch to English'],
+      ['404', 'piérdete en la página que no existe'],
       ['reboot', 'reinicia el sistema'],
       ['history · date · clear', 'lo de siempre'],
     ],
@@ -76,6 +77,7 @@ const TXT = {
     cube: 'compiz --replace &amp;  <span class="c-muted"># como en 2008</span>',
     cubeOff: 'cube: la pantalla es demasiado pequeña para el cubo.',
     rebootKitty: 'reboot: hazlo desde la terminal principal.',
+    notFoundPage: 'Entrando en el laberinto...',
   },
   en: {
     welcome: 'Welcome to <b>japozo.dev</b>. Type <span class="ok">help</span> to list the commands.',
@@ -93,6 +95,7 @@ const TXT = {
       ['cmatrix · cava', 'effects (any key to quit)'],
       ['hyprctl', 'tweak the desktop live'],
       ['lang es', 'cambiar a español'],
+      ['404', 'get lost in the page that is not there'],
       ['reboot', 'restart the system'],
       ['history · date · clear', 'the usual'],
     ],
@@ -117,6 +120,7 @@ const TXT = {
     cube: 'compiz --replace &amp;  <span class="c-muted"># like it is 2008</span>',
     cubeOff: 'cube: the screen is too small for the cube.',
     rebootKitty: 'reboot: run it from the main terminal.',
+    notFoundPage: 'Entering the maze...',
   },
 };
 
@@ -137,7 +141,7 @@ const SECTIONS: Record<string, string> = {
 const COMMANDS = [
   'help', 'whoami', 'fastfetch', 'ls', 'cat bio.txt', 'cd', 'email', 'github', 'linkedin',
   'tema', 'theme', 'kitty', 'cube', 'cmatrix', 'cava', 'hyprctl', 'lang', 'history', 'date', 'clear',
-  'sudo hire-me', 'exit', 'reboot', 'proyectos', 'projects', 'contacto', 'contact', 'sobre-mi', 'about', 'echo',
+  'sudo hire-me', 'exit', 'reboot', '404', 'proyectos', 'projects', 'contacto', 'contact', 'sobre-mi', 'about', 'echo',
 ];
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -334,6 +338,9 @@ export function createTerminal(root: HTMLElement, opts: TerminalOptions = {}): T
       case 'claude':
         print('clac clac', 'c-muted');
         return void crab(term);
+      case '404':
+        print(T.notFoundPage, 'c-muted');
+        return void setTimeout(() => (location.href = lang === 'es' ? '/404' : '/404?lang=en'), 500);
       case 'reboot':
         if (!opts.boot) return print(T.rebootKitty, 'c-warn');
         return void reboot();
