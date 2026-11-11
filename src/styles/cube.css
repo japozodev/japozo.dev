@@ -437,6 +437,7 @@ html.cube .lid {
   place-items: center;
 }
 html.cube .lid__in {
+  position: relative;
   display: grid;
   justify-items: center;
   gap: 0.6rem;
@@ -462,6 +463,39 @@ html.cube .lid__logo {
     0.03em 0 currentColor,
     0 0.03em currentColor;
 }
+/* tapa de arriba: el logo va en ocho franjas, como el de IBM en los PC antiguos, y
+   se dibuja franja a franja al llegar al frente. Cada fila de píxeles del logo mide
+   0.6em (medio renglón), así que la máscara corta una franja por fila */
+html.cube .lid--top .lid__logo {
+  -webkit-mask: repeating-linear-gradient(to bottom, #000 0 0.4em, transparent 0.4em 0.6em);
+  mask: repeating-linear-gradient(to bottom, #000 0 0.4em, transparent 0.4em 0.6em);
+}
+/* con el cubo en otra posición la tapa queda vacía */
+html.cube .lid--top:not(.is-front) .lid__in {
+  visibility: hidden;
+}
+html.cube .lid--top.is-front .lid__logo {
+  animation: logo-scan 0.5s steps(8) 0.9s both;
+}
+html.cube .lid--top.is-front .lid__in > p {
+  animation: logo-after 0s linear 1.5s both;
+}
+@keyframes logo-scan {
+  from {
+    clip-path: inset(0 0 100% 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+@keyframes logo-after {
+  from {
+    visibility: hidden;
+  }
+  to {
+    visibility: visible;
+  }
+}
 html.cube .lid .lid__exit {
   justify-self: center;
   margin-top: 0.6rem;
@@ -470,8 +504,9 @@ html.cube .lid .lid__exit {
   line-height: 1.1;
   color: var(--accent);
 }
-/* base: la placa de circuito de fondo y, en el centro, un panel con el log y el apagado */
-html.cube .lid--bottom::before {
+/* las dos tapas llevan la placa de circuito de fondo; la base, además, un panel en
+   el centro con el log y el apagado */
+html.cube .lid::before {
   content: '';
   position: absolute;
   inset: 0;
