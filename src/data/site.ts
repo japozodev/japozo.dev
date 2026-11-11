@@ -162,11 +162,64 @@ export const TIMELINE: { hash: string; tag?: string; msg: Localized }[] = [
   },
   {
     hash: '5e8d1ec',
-    msg: { es: 'refactor: 10 años de encargado en Viserco (proyectos y clientes)', en: 'refactor: 10 years as supervisor at Viserco (projects and clients)' },
+    msg: { es: 'refactor: 10 años de encargado en Viserco Seguridad (proyectos y clientes)', en: 'refactor: 10 years as supervisor at Viserco Seguridad (projects and clients)' },
   },
   {
     hash: '0000001',
     tag: 'v1.0',
-    msg: { es: 'init: técnico de seguridad y sistemas', en: 'init: security and systems technician' },
+    msg: {
+      es: 'init: 10 años departamento sistemas en Desecom Seguridad (León)',
+      en: 'init: 10 years, systems department at Desecom Seguridad (León)',
+    },
+  },
+];
+
+// Salida estilo `git log --graph --oneline --decorate` para la base del cubo: la
+// rama de estudios sale del trabajo en seguridad y se fusiona en main al entrar en
+// Kewo. `graph` es el dibujo de ramas tal cual lo pinta git (columna 0 = main).
+export const GITGRAPH: { graph: string; hash?: string; refs?: string; msg?: Localized }[] = [
+  {
+    graph: '* ',
+    hash: 'a27f0de',
+    refs: 'HEAD -> main',
+    msg: { es: 'feat: japozo.dev v27, rehecha desde cero', en: 'feat: japozo.dev v27, rebuilt from scratch' },
+  },
+  { graph: '* ', hash: '9c41b2e', msg: { es: 'feat: desarrollador web en @Kewo', en: 'feat: web developer at @Kewo' } },
+  {
+    graph: '*   ',
+    hash: 'e1f0b7c',
+    msg: { es: "Merge branch 'desarrollo-web'", en: "Merge branch 'desarrollo-web'" },
+  },
+  { graph: '|\\' },
+  {
+    graph: '| * ',
+    hash: '7d3e9a1',
+    refs: 'desarrollo-web',
+    msg: { es: 'feat: prácticas en @Kewo', en: 'feat: internship at @Kewo' },
+  },
+  {
+    graph: '| * ',
+    hash: 'b84d2f0',
+    msg: { es: 'feat: ciclo superior de desarrollo web, 3 años', en: 'feat: web development degree, 3 years' },
+  },
+  {
+    graph: '* | ',
+    hash: 'c5a1d9e',
+    msg: { es: 'chore: encargado, padre y estudiante a la vez', en: 'chore: supervisor, dad and student at once' },
+  },
+  { graph: '|/' },
+  {
+    graph: '* ',
+    hash: '5e8d1ec',
+    msg: { es: 'feat: 10 años de encargado en Viserco Seguridad', en: 'feat: 10 years as supervisor at Viserco Seguridad' },
+  },
+  {
+    graph: '* ',
+    hash: '0000001',
+    refs: 'tag: v1.0',
+    msg: {
+      es: 'init: 10 años departamento sistemas en Desecom Seguridad (León)',
+      en: 'init: 10 years, systems department at Desecom Seguridad (León)',
+    },
   },
 ];

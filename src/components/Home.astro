@@ -1,6 +1,7 @@
 ---
 import { LOGO } from '../data/logo';
 import type { Lang } from '../data/site';
+import { GITGRAPH } from '../data/site';
 import { useTranslations } from '../i18n/ui';
 import Base from '../layouts/Base.astro';
 import About from './About.astro';
@@ -17,6 +18,14 @@ interface Props {
 const { lang } = Astro.props;
 const t = useTranslations(lang);
 const year = new Date().getFullYear();
+
+// base del cubo: los comandos se teclean y la salida aparece línea a línea cuando la
+// tapa llega al frente. Tiempos en segundos desde que empieza el giro.
+const CMD_LOG = 'git log --graph --oneline --decorate';
+const CMD_OFF = 'shutdown -h now';
+const T_LOG = 0.9;
+const T_LINES = T_LOG + 1;
+const T_OFF = T_LINES + GITGRAPH.length * 0.09 + 0.35;
 ---
 
 <Base lang={lang}>
@@ -41,11 +50,36 @@ const year = new Date().getFullYear();
             </div>
           </div>
           <div class="face face--lid">
+            <!-- base del cubo: la placa, con el git log (en el cubo se muestra aquí en
+                 vez de en "sobre mí") y el apagado -->
             <div class="lid lid--bottom" aria-hidden="true">
-              <div class="lid__in">
-                <p class="lid__exit">exit 0</p>
-                <p>© {year} J. A. Pozo</p>
-                <p class="c-muted">{t.footer.made}</p>
+              <div class="lid__in lid__board">
+                <p class="lid__cmd tty" style={`--d:${T_LOG}s`}>
+                  <span class="c-accent">❯</span>{' '}
+                  <span class="lid__typed" style={`--n:${CMD_LOG.length};--d:${T_LOG}s;--t:0.85s`}>{CMD_LOG}</span>
+                </p>
+                <ol class="lid__log">
+                  {
+                    GITGRAPH.map((c, i) => (
+                      <li class="tty" style={`--d:${(T_LINES + i * 0.09).toFixed(2)}s`}>
+                        {/* columna 0 = main; el resto del dibujo es la rama */}
+                        {[...c.graph].map((ch, i) => <span class={i === 0 ? 'g-main' : 'g-branch'}>{ch}</span>)}
+                        {c.hash && <span class="c-warn">{c.hash}</span>}
+                        {c.refs && <span class="c-info"> ({c.refs})</span>}
+                        {c.msg && ` ${c.msg[lang]}`}
+                      </li>
+                    ))
+                  }
+                </ol>
+                <p class="lid__cmd tty" style={`--d:${T_OFF.toFixed(2)}s`}>
+                  <span class="c-accent">❯</span>{' '}
+                  <span class="lid__typed" style={`--n:${CMD_OFF.length};--d:${T_OFF.toFixed(2)}s;--t:0.4s`}>{CMD_OFF}</span>
+                </p>
+                <p class="c-muted tty" style={`--d:${(T_OFF + 0.7).toFixed(2)}s`}>
+                  [<span class="c-accent">  OK  </span>] Reached target Power-Off.
+                </p>
+                <p class="lid__exit tty" style={`--d:${(T_OFF + 1.05).toFixed(2)}s`}>exit 0</p>
+                <p class="lid__copy c-muted tty" style={`--d:${(T_OFF + 1.3).toFixed(2)}s`}>© {year} J. A. Pozo</p>
               </div>
             </div>
           </div>
@@ -61,7 +95,6 @@ const year = new Date().getFullYear();
   <footer class="footer">
     <div class="container footer__inner">
       <span>© {year} J. A. Pozo</span>
-      <span class="c-muted">{t.footer.made}</span>
       <span class="c-accent" aria-hidden="true">exit 0</span>
     </div>
   </footer>
