@@ -1,4 +1,5 @@
 ---
+import { LOGO } from '../data/logo';
 import type { Lang } from '../data/site';
 import { useTranslations } from '../i18n/ui';
 import Base from '../layouts/Base.astro';
@@ -21,15 +22,36 @@ const year = new Date().getFullYear();
 <Base lang={lang}>
   <Header lang={lang} />
   <main id="main">
-    <div class="cube-tilt" id="cube-tilt">
-      <div class="cube" id="cube">
-        <Hero lang={lang} />
-        <Projects lang={lang} />
-        <About lang={lang} />
-        <Contact lang={lang} />
+    <div class="stage">
+      <div class="cube-tilt" id="cube-tilt">
+        <div class="cube" id="cube">
+          <Hero lang={lang} />
+          <Projects lang={lang} />
+          <About lang={lang} />
+          <Contact lang={lang} />
+          <!-- tapas del cubo: decorativas, solo existen en modo cubo -->
+          <div class="lid lid--top" aria-hidden="true">
+            <div class="lid__in">
+              <pre class="lid__logo">{LOGO}</pre>
+              <p>japozo.dev <span class="c-accent">v27</span></p>
+            </div>
+          </div>
+          <div class="lid lid--bottom" aria-hidden="true">
+            <div class="lid__in">
+              <p class="lid__exit">exit 0</p>
+              <p>© {year} J. A. Pozo</p>
+              <p class="c-muted">{t.footer.made}</p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
+    <!-- en modo cubo la terminal y btop se sacan aquí, como ventanas del escritorio -->
+    <aside class="dock" id="dock"></aside>
   </main>
+  <script is:inline>
+    if (document.documentElement.classList.contains('cube')) document.getElementById('dock').append(document.querySelector('.desktop'));
+  </script>
   <footer class="footer">
     <div class="container footer__inner">
       <span>© {year} J. A. Pozo</span>

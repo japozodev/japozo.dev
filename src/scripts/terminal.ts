@@ -6,7 +6,6 @@ import { goToSection, spinCube } from './workspaces';
 import { cava, cmatrix } from './effects';
 import { hyprctl } from './hyprctl';
 
-const BOOT_KEY = 'japozo-booted';
 
 const BOOT_LINES = [
   '[    0.000000] Linux version 6.12.4 (pozo@japozo) (gcc 14.2.1)',
@@ -308,12 +307,7 @@ export function createTerminal(root: HTMLElement, opts: TerminalOptions = {}): T
 
   // --- arranque: rápido, no bloquea la página y se puede saltar ---
   const boot = async () => {
-    let seen = false;
-    try {
-      seen = sessionStorage.getItem(BOOT_KEY) === '1';
-    } catch {}
-
-    if (!seen && !reduceMotion) {
+    if (!reduceMotion) {
       term.dataset.booting = '';
       out.setAttribute('aria-busy', 'true');
       const skip = () => (skipBoot = true);
@@ -336,13 +330,10 @@ export function createTerminal(root: HTMLElement, opts: TerminalOptions = {}): T
     }
 
     delete term.dataset.booting;
-    try {
-      sessionStorage.setItem(BOOT_KEY, '1');
-    } catch {}
 
     print(promptHtml('fastfetch').replace(/ fastfetch$/, ' '), 'typing');
     const typingLine = out.lastElementChild as HTMLElement;
-    if (!reduceMotion && !skipBoot && !seen) {
+    if (!reduceMotion && !skipBoot) {
       typingLine.innerHTML += '<span class="cursor"></span>';
       for (const ch of 'fastfetch') {
         await sleep(55);

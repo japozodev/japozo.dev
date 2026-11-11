@@ -1,0 +1,439 @@
+/* ---------- CUBO DE WORKSPACES (Compiz) ---------- */
+/* En escritorio cada sección es una cara de un cubo cuadrado y translúcido que flota
+   en el centro; workspaces.ts lo gira. La clase .cube la pone el script inline de
+   Base.astro. Las caras se maquetan a un tamaño fijo (--face) y el escenario entero
+   se escala al hueco disponible: así todo cabe siempre, sin scroll. */
+html.cube {
+  scroll-behavior: auto;
+  --header-h: calc(3.25rem + 1px);
+  --nav-w: 12.5rem;
+  --dock-w: clamp(21rem, 27vw, 31rem);
+  --gap-y: clamp(1.25rem, 5vh, 3.25rem);
+  --gap-x: clamp(1.5rem, 3vw, 4rem);
+  /* lado del cubo en píxeles de diseño (HALF en workspaces.ts es la mitad) */
+  --face: 720px;
+  /* lado real: lo que quepa entre cabecera, barra, menú y terminal */
+  --side: min(
+    100dvh - var(--header-h) - var(--statusbar-h) - 2 * var(--gap-y),
+    100vw - var(--nav-w) - var(--dock-w) - 2 * var(--gap-x)
+  );
+  /* cociente de dos longitudes sin unidades */
+  --k: tan(atan2(var(--side), var(--face)));
+}
+html.cube body {
+  height: 100dvh;
+  overflow: hidden;
+}
+html.cube .footer {
+  display: none;
+}
+html.cube #main {
+  position: fixed;
+  inset: var(--header-h) 0 var(--statusbar-h) 0;
+  overflow: hidden;
+  background: var(--bg);
+}
+/* el escritorio de detrás del cubo: el mismo tramado del wallpaper */
+html.cube #main::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, var(--accent-2), var(--accent));
+  -webkit-mask: url('/wallpaper.svg') center / cover no-repeat;
+  mask: url('/wallpaper.svg') center / cover no-repeat;
+  opacity: 0.2;
+}
+html.cube .stage {
+  position: absolute;
+  top: 50%;
+  left: calc(var(--nav-w) + (100vw - var(--nav-w) - var(--dock-w)) / 2);
+  width: var(--face);
+  height: var(--face);
+  margin: calc(var(--face) / -2) 0 0 calc(var(--face) / -2);
+  transform: scale(var(--k));
+  perspective: 1500px;
+}
+/* inclinación que sigue al ratón: así siempre se lee como un volumen */
+html.cube .cube-tilt {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  transform-origin: 50% 50% calc(var(--face) / -2);
+  transform: rotateX(var(--tilt-x, -4deg)) rotateY(var(--tilt-y, 7deg));
+  transition: transform 0.8s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+html.cube .cube {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  transform: translateZ(calc(var(--face) / -2));
+  will-change: transform;
+}
+html.cube-drag,
+html.cube-drag * {
+  cursor: grabbing !important;
+  user-select: none !important;
+}
+
+/* ---------- caras ---------- */
+html.cube .cube > section,
+html.cube .cube > .lid {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  min-height: 0;
+  overflow: hidden;
+  /* cristal ahumado: se ve el interior del cubo y las caras de detrás */
+  background-color: color-mix(in srgb, var(--bg) 22%, transparent);
+  border: var(--win-border) solid color-mix(in srgb, var(--accent) 65%, var(--border));
+  backface-visibility: visible;
+  transition: background-color 0.5s, border-color 0.5s, box-shadow 0.5s;
+  outline: none;
+}
+html.cube .cube > section:nth-of-type(1) { transform: rotateY(0deg) translateZ(calc(var(--face) / 2)); }
+html.cube .cube > section:nth-of-type(2) { transform: rotateY(90deg) translateZ(calc(var(--face) / 2)); }
+html.cube .cube > section:nth-of-type(3) { transform: rotateY(180deg) translateZ(calc(var(--face) / 2)); }
+html.cube .cube > section:nth-of-type(4) { transform: rotateY(270deg) translateZ(calc(var(--face) / 2)); }
+html.cube .cube > .lid--top { transform: rotateX(90deg) translateZ(calc(var(--face) / 2)); }
+html.cube .cube > .lid--bottom { transform: rotateX(-90deg) translateZ(calc(var(--face) / 2)); }
+
+/* escuadras en las esquinas de cada cara */
+html.cube .cube > section::after,
+html.cube .cube > .lid::after {
+  content: '';
+  position: absolute;
+  inset: 0.6rem;
+  z-index: 3;
+  pointer-events: none;
+  --c: var(--accent);
+  --l: 1.1rem;
+  background:
+    linear-gradient(var(--c) 0 0) 0 0 / var(--l) 2px,
+    linear-gradient(var(--c) 0 0) 0 0 / 2px var(--l),
+    linear-gradient(var(--c) 0 0) 100% 0 / var(--l) 2px,
+    linear-gradient(var(--c) 0 0) 100% 0 / 2px var(--l),
+    linear-gradient(var(--c) 0 0) 0 100% / var(--l) 2px,
+    linear-gradient(var(--c) 0 0) 0 100% / 2px var(--l),
+    linear-gradient(var(--c) 0 0) 100% 100% / var(--l) 2px,
+    linear-gradient(var(--c) 0 0) 100% 100% / 2px var(--l);
+  background-repeat: no-repeat;
+  opacity: 0.7;
+}
+
+/* el contenido de las caras que no están delante queda atenuado */
+html.cube .cube > section > *,
+html.cube .cube > .lid > * {
+  opacity: 0.22;
+  transition: opacity 0.5s;
+}
+html.cube .cube > .is-front > *,
+html.cube[data-spin] .cube > section > *,
+html.cube[data-spin] .cube > .lid > * {
+  opacity: 1;
+}
+/* cara activa: más opaca para leer bien y con el borde en degradado de Hyprland */
+html.cube .cube > .is-front {
+  background-color: color-mix(in srgb, var(--bg) 70%, transparent);
+  border-image: linear-gradient(45deg, var(--accent), var(--accent-2)) 1;
+  box-shadow: 0 0 44px -14px var(--glow);
+}
+/* mientras gira: todas iguales y con las aristas encendidas */
+html.cube[data-spin] .cube > section,
+html.cube[data-spin] .cube > .lid {
+  background-color: color-mix(in srgb, var(--bg) 62%, transparent);
+  border-color: color-mix(in srgb, var(--accent) 80%, var(--border));
+  box-shadow: none;
+}
+
+/* los reveal dependen del scroll de la página; en el cubo se muestran sin más */
+html.cube .reveal {
+  transform: none;
+}
+html.cube .cube .reveal {
+  opacity: 1;
+}
+html.cube .cube .container {
+  width: 100%;
+}
+html.cube .cube > .section {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 2.25rem 2.5rem;
+}
+
+/* cabeceras de sección: el comando se teclea cuando la cara llega al frente */
+html.cube .cube .sh {
+  margin-bottom: 1.25rem;
+}
+html.cube .cube .sh__cmd {
+  margin-bottom: 0.4rem;
+  font-size: 0.8rem;
+}
+html.cube .cube .sh__title {
+  font-size: 2.25rem;
+}
+html.cube .cube .sh__lead {
+  margin-top: 0.6rem;
+  font-size: 0.9rem;
+}
+html.cube .cube .sh__typed {
+  width: 0;
+  animation: none;
+}
+html.cube .cube > .is-front .sh__typed {
+  animation:
+    type 0.7s steps(var(--n)) 0.45s forwards,
+    caret 1s steps(1) 1.15s infinite;
+}
+
+/* ---------- cara 1: inicio ---------- */
+html.cube .cube > .hero {
+  display: block;
+  padding: 0;
+}
+html.cube .cube .hero__bg {
+  display: none;
+}
+html.cube .cube .hero__grid {
+  display: block;
+  height: 100%;
+  padding: 2.75rem 3rem 2.5rem;
+}
+html.cube .cube .hero__copy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  height: 100%;
+}
+html.cube .cube .hero__kicker {
+  margin: 0;
+}
+html.cube .cube .hero__title {
+  margin-top: auto;
+  font-size: 9.5rem;
+  line-height: 1;
+}
+html.cube .cube .hero__hello {
+  font-size: 1.9rem;
+  margin-bottom: 0.3rem;
+}
+html.cube .cube .hero__role {
+  margin-top: 1rem;
+  font-size: 1.4rem;
+}
+html.cube .cube .hero__lead {
+  max-width: 36rem;
+  margin: 0.9rem 0 1.6rem;
+}
+html.cube .cube .hero__keys {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1.4rem;
+  width: 100%;
+  margin: auto 0 0;
+  padding: 0.9rem 0 0;
+  border-top: 1px dashed var(--border);
+  list-style: none;
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+html.cube .cube .hero__keys li {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+html.cube .cube .hero__keys kbd {
+  padding: 0.05rem 0.4rem;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--surface);
+  color: var(--fg);
+  font: inherit;
+}
+html.cube .cube .hero__keys kbd:last-of-type {
+  margin-right: 0.3rem;
+}
+
+/* ---------- cara 2: proyectos (mosaico 2x2) ---------- */
+html.cube .cube #proyectos .sh__lead {
+  display: none;
+}
+html.cube .cube .projects {
+  gap: 1.1rem 1.25rem;
+}
+html.cube .cube .card {
+  gap: 0.6rem;
+}
+html.cube .cube .card .window {
+  height: 12rem;
+}
+html.cube .cube .card__media {
+  aspect-ratio: auto;
+  height: 100%;
+}
+html.cube .cube .card__body {
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.3rem 0.75rem;
+  align-items: baseline;
+}
+html.cube .cube .card__title {
+  grid-area: 1 / 1;
+  font-size: 1.05rem;
+  letter-spacing: 0;
+}
+html.cube .cube .card__top {
+  grid-area: 1 / 2;
+  font-size: 0.72rem;
+}
+html.cube .cube .card__num,
+html.cube .cube .card__visit,
+html.cube .cube .card__meta div:first-child,
+html.cube .cube .card__meta dt {
+  display: none;
+}
+html.cube .cube .card__meta {
+  grid-column: 1 / -1;
+}
+html.cube .cube .card__meta div {
+  display: block;
+}
+html.cube .cube .tag {
+  font-size: 0.68rem;
+}
+/* la descripción aparece sobre la captura al pasar el ratón */
+html.cube .cube .card__desc {
+  position: absolute;
+  inset: var(--win-border) var(--win-border) auto;
+  height: calc(12rem - 2 * var(--win-border));
+  display: flex;
+  align-items: flex-end;
+  padding: 1rem;
+  border-radius: calc(var(--radius) - var(--win-border));
+  background: color-mix(in srgb, var(--bg) 90%, transparent);
+  color: var(--fg);
+  font-size: 0.82rem;
+  line-height: 1.5;
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity 0.25s;
+}
+html.cube .cube .card:hover .card__desc,
+html.cube .cube .card:focus-within .card__desc {
+  opacity: 1;
+}
+
+/* ---------- cara 3: sobre mí ---------- */
+html.cube .cube .about__grid {
+  grid-template-columns: 11.5rem minmax(0, 1fr);
+  grid-template-areas:
+    'photo text'
+    'pkgs pkgs'
+    'log log';
+  gap: 1.1rem 1.5rem;
+}
+html.cube .cube .about__text {
+  font-size: 0.88rem;
+  line-height: 1.55;
+}
+html.cube .cube .about__text p {
+  margin-bottom: 0.6rem;
+}
+html.cube .cube .about__panel {
+  padding-top: 0.8rem;
+  font-size: 0.78rem;
+}
+html.cube .cube .panel__cmd {
+  margin-bottom: 0.5rem;
+}
+html.cube .cube .pkgs {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.15rem 1.75rem;
+}
+
+/* ---------- cara 4: contacto ---------- */
+html.cube .cube .row dd {
+  font-size: 1rem;
+}
+
+/* ---------- tapas ---------- */
+.lid {
+  display: none;
+}
+html.cube .lid {
+  display: grid;
+  place-items: center;
+}
+html.cube .lid__in {
+  display: grid;
+  justify-items: center;
+  gap: 0.6rem;
+  text-align: center;
+  rotate: var(--lid-rot, 0deg);
+}
+html.cube .lid--bottom .lid__in {
+  rotate: calc(-1 * var(--lid-rot, 0deg));
+}
+html.cube .lid p {
+  margin: 0;
+  font-size: 0.85rem;
+}
+html.cube .lid__logo {
+  margin: 0 0 0.6rem;
+  font: inherit;
+  font-size: 1.3rem;
+  line-height: 1.2;
+  color: var(--accent);
+  text-shadow:
+    0.03em 0 currentColor,
+    0 0.03em currentColor;
+}
+html.cube .lid .lid__exit {
+  font-size: 4.5rem;
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--accent);
+}
+
+/* ---------- terminal y btop fuera del cubo ---------- */
+.dock {
+  display: none;
+}
+html.cube .dock {
+  position: absolute;
+  top: var(--gap-y);
+  bottom: var(--gap-y);
+  right: 1.5rem;
+  width: calc(var(--dock-w) - 1.5rem);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+html.cube .dock .desktop {
+  grid-template-rows: minmax(0, 1fr);
+  height: 100%;
+  max-height: 46rem;
+}
+html.cube .dock .tiles {
+  grid-template-rows: minmax(0, 1fr) auto;
+  min-height: 0;
+}
+html.cube .dock .tiles[data-count='3'] {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1.4fr) minmax(0, 1fr);
+  grid-template-areas: 'main' 'kitty';
+}
+html.cube .dock .tiles[data-count='3'] .tile--btop {
+  display: none;
+}
+html.cube .dock .tile {
+  min-height: 0;
+}
+html.cube .dock .term {
+  height: 100%;
+  min-height: 0;
+}
+html.cube .dock .btop__head--proc,
+html.cube .dock .btop__procs {
+  display: none;
+}

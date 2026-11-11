@@ -58,8 +58,4 @@ export function initDesktop() {
       if (!reduce) await sleep(260);
     }
   })();
-
-  document.querySelectorAll<HTMLButtonElement>('.chip[data-cmd]').forEach((chip) =>
-    chip.addEventListener('click', () => mainTerm?.typeAndRun(chip.dataset.cmd!)),
-  );
 }

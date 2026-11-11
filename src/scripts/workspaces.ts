@@ -1,15 +1,22 @@
 // Las secciones se comportan como workspaces de Hyprland. En escritorio son las
-// caras de un cubo que gira como el de Compiz; en móvil o con movimiento reducido
-// se desliza la página en horizontal (View Transitions). Teclas 1-4 como Super+N.
+// caras de un cubo de verdad (cuadrado, translúcido, con tapas) que gira como el de
+// Compiz; en móvil o con movimiento reducido se desliza la página en horizontal
+// (View Transitions). Teclas 1-4 como Super+N.
 
 export const WORKSPACES = ['inicio', 'proyectos', 'sobre-mi', 'contacto'];
 
 // mismo criterio que el script inline de Base.astro
-const CUBE_MQ = '(min-width: 900px) and (min-height: 560px) and (prefers-reduced-motion: no-preference)';
-const SPIN_MS = 1100;
+const CUBE_MQ = '(min-width: 1100px) and (min-height: 560px) and (prefers-reduced-motion: no-preference)';
+// mitad del lado del cubo en píxeles de diseño (--face en global.css)
+const HALF = 360;
+
+type Lid = 'top' | 'bottom' | null;
 
 let current = 'inicio';
-let turns = 0; // giros acumulados en cuartos de vuelta (el cubo no "rebobina")
+let lid: Lid = null;
+// orientación del cubo en grados (y acumula vueltas, no "rebobina") y alejamiento en px
+const rot = { x: 0, y: 0, z: 0 };
+let raf = 0;
 const listeners = new Set<(id: string) => void>();
 
 export const onWorkspaceChange = (fn: (id: string) => void) => {
@@ -23,52 +30,74 @@ const setCurrent = (id: string) => {
   listeners.forEach((fn) => fn(id));
 };
 
-const cubeOn = () => document.documentElement.classList.contains('cube');
+const html = document.documentElement;
+const cubeOn = () => html.classList.contains('cube');
 const cubeEl = () => document.getElementById('cube');
+const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v));
+const mod4 = (n: number) => ((n % 4) + 4) % 4;
 
-const restTransform = (r: number, q: number) => `translateZ(${-r}px) rotateY(${-q * 90}deg)`;
+const render = () => {
+  const cube = cubeEl();
+  if (cube) cube.style.transform = `translateZ(${-HALF - rot.z}px) rotateX(${rot.x}deg) rotateY(${rot.y}deg)`;
+};
 
 // solo la cara visible es navegable; el resto queda inerte
 const syncFaces = () => {
   WORKSPACES.forEach((id) => {
     const s = document.getElementById(id);
     if (!s) return;
-    const off = cubeOn() && id !== current;
+    const off = cubeOn() && (id !== current || !!lid);
     s.toggleAttribute('inert', off);
     s.classList.toggle('is-front', cubeOn() && !off);
   });
+  document.querySelectorAll('.lid').forEach((l) => l.classList.toggle('is-front', !!lid && l.classList.contains(`lid--${lid}`)));
+  // las tapas se leen siempre derechas, se llegue desde la cara que se llegue
+  cubeEl()?.style.setProperty('--lid-rot', `${Math.round(rot.y / 90) * 90}deg`);
 };
 
-// gira el cubo `delta` cuartos de vuelta: se aleja, rota y vuelve a pegarse a la pantalla
-function spin(delta: number) {
-  const cube = cubeEl();
-  if (!cube) return;
-  const r = cube.clientWidth / 2;
-  const from = getComputedStyle(cube).transform;
-  cube.getAnimations().forEach((a) => a.cancel());
+const stop = () => {
+  cancelAnimationFrame(raf);
+  raf = 0;
+};
 
-  const startQ = turns;
-  turns += delta;
-  const zoom = r * (0.45 + 0.15 * Math.min(Math.abs(delta), 4));
-  const html = document.documentElement;
+// gira el cubo hasta (tx, ty): se aleja, rota y vuelve a pegarse a la pantalla
+function animateTo(tx: number, ty: number) {
+  stop();
+  const from = { ...rot };
+  const dist = Math.max(Math.abs(tx - from.x), Math.abs(ty - from.y));
+  const ms = clamp(450 + dist * 4.5, 500, 1900);
+  const zoom = HALF * Math.min(0.75, dist / 140);
+  const t0 = performance.now();
   html.dataset.spin = '';
-  const anim = cube.animate(
-    [
-      { transform: from === 'none' ? restTransform(r, startQ) : from },
-      { transform: `translateZ(${-r - zoom}px) rotateY(${-startQ * 90}deg)`, offset: 0.22, easing: 'cubic-bezier(0.4, 0, 0.2, 1)' },
-      { transform: `translateZ(${-r - zoom}px) rotateY(${-turns * 90}deg)`, offset: 0.72, easing: 'cubic-bezier(0.3, 0, 0.1, 1)' },
-      { transform: restTransform(r, turns) },
-    ],
-    { duration: SPIN_MS * (Math.abs(delta) > 1 ? 1.25 : 1), easing: 'cubic-bezier(0.45, 0, 0.2, 1)' },
-  );
-  cube.style.transform = restTransform(r, turns);
-  anim.finished.then(() => delete html.dataset.spin, () => {});
+  const step = (now: number) => {
+    const t = Math.min(1, (now - t0) / ms);
+    const e = t < 0.5 ? 4 * t ** 3 : 1 - (-2 * t + 2) ** 3 / 2;
+    rot.x = from.x + (tx - from.x) * e;
+    rot.y = from.y + (ty - from.y) * e;
+    rot.z = from.z * (1 - e) + zoom * Math.sin(Math.PI * t);
+    render();
+    if (t < 1) {
+      raf = requestAnimationFrame(step);
+    } else {
+      raf = 0;
+      delete html.dataset.spin;
+    }
+  };
+  raf = requestAnimationFrame(step);
 }
 
-const spinning = () => !!cubeEl()?.getAnimations().length;
+// ángulo equivalente a la cara `i` más cercano a la orientación actual
+const ringAngle = (i: number) => -90 * i + 360 * Math.round((rot.y + 90 * i) / 360);
 
-// rueda del ratón: hace scroll dentro de la cara y, al llegar al borde, un gesto
-// nuevo de rueda gira el cubo a la cara siguiente o anterior
+// tapa de arriba o de abajo (↑ ↓ o arrastrando); son decorativas, no workspaces
+function showLid(which: Exclude<Lid, null>) {
+  lid = which;
+  const ty = Math.round(rot.y / 90) * 90;
+  syncFaces();
+  animateTo(which === 'top' ? -90 : 90, ty);
+}
+
+// rueda del ratón sobre el cubo: cada gesto nuevo gira a la cara siguiente o anterior
 function initWheel() {
   let last = 0;
   let armed = false;
@@ -77,24 +106,12 @@ function initWheel() {
     'wheel',
     (e) => {
       if (!cubeOn() || e.ctrlKey || Math.abs(e.deltaY) < Math.abs(e.deltaX)) return;
+      if ((e.target as Element).closest('.dock')) return;
+      e.preventDefault();
       const now = performance.now();
       const fresh = now - last > 220; // la rueda llevaba un rato quieta: gesto nuevo
       last = now;
-      if (spinning()) {
-        e.preventDefault();
-        armed = false;
-        return;
-      }
-      const face = document.getElementById(current);
-      if (!face) return;
-      const down = e.deltaY > 0;
-      const atEdge = down ? face.scrollTop + face.clientHeight >= face.scrollHeight - 2 : face.scrollTop <= 0;
-      if (!atEdge) {
-        armed = false;
-        acc = 0;
-        return;
-      }
-      e.preventDefault();
+      if (raf) return void (armed = false);
       if (fresh) {
         armed = true;
         acc = 0;
@@ -103,12 +120,59 @@ function initWheel() {
       acc += e.deltaY;
       if (Math.abs(acc) < 60) return;
       armed = false;
-      acc = 0;
       const i = WORKSPACES.indexOf(current);
-      goToSection(WORKSPACES[(i + (down ? 1 : 3)) % 4]);
+      goToSection(lid ? current : WORKSPACES[mod4(i + (acc > 0 ? 1 : -1))]);
+      acc = 0;
     },
     { passive: false },
   );
+}
+
+// arrastrar con el ratón: rotación libre y, al soltar, encaja en la cara más cercana
+function initDrag() {
+  const main = document.getElementById('main');
+  if (!main) return;
+  let start: { x: number; y: number; rx: number; ry: number } | null = null;
+  let dragging = false;
+
+  main.addEventListener('pointerdown', (e) => {
+    if (!cubeOn() || e.button !== 0) return;
+    if ((e.target as Element).closest('a, button, input, textarea, .dock')) return;
+    start = { x: e.clientX, y: e.clientY, rx: 0, ry: 0 };
+  });
+  addEventListener('pointermove', (e) => {
+    if (!start) return;
+    const dx = e.clientX - start.x;
+    const dy = e.clientY - start.y;
+    if (!dragging) {
+      if (Math.hypot(dx, dy) < 8) return;
+      dragging = true;
+      stop();
+      start = { x: e.clientX, y: e.clientY, rx: rot.x, ry: rot.y };
+      html.dataset.spin = '';
+      html.classList.add('cube-drag');
+      getSelection()?.removeAllRanges();
+      return;
+    }
+    rot.y = start.ry + dx * 0.35;
+    rot.x = clamp(start.rx - dy * 0.35, -90, 90);
+    rot.z += (HALF * 0.45 - rot.z) * 0.15;
+    render();
+  });
+  const end = () => {
+    if (!start) return;
+    start = null;
+    if (!dragging) return;
+    dragging = false;
+    html.classList.remove('cube-drag');
+    const ty = Math.round(rot.y / 90) * 90;
+    lid = rot.x < -45 ? 'top' : rot.x > 45 ? 'bottom' : null;
+    if (!lid) setCurrent(WORKSPACES[mod4(Math.round(-ty / 90))]);
+    syncFaces();
+    animateTo(lid === 'top' ? -90 : lid === 'bottom' ? 90 : 0, ty);
+  };
+  addEventListener('pointerup', end);
+  addEventListener('pointercancel', end);
 }
 
 // inclinación leve que sigue al ratón
@@ -122,15 +186,18 @@ function initTilt() {
       frame = 0;
       const x = e.clientX / innerWidth - 0.5;
       const y = e.clientY / innerHeight - 0.5;
-      tilt.style.setProperty('--tilt-y', `${(x * 10).toFixed(2)}deg`);
-      tilt.style.setProperty('--tilt-x', `${(-y * 6).toFixed(2)}deg`);
+      tilt.style.setProperty('--tilt-y', `${(x * 14).toFixed(2)}deg`);
+      tilt.style.setProperty('--tilt-x', `${(-y * 10).toFixed(2)}deg`);
     });
   });
 }
 
 // una vuelta completa sin cambiar de workspace (comando `cube` de la terminal)
 export function spinCube() {
-  if (cubeOn()) spin(4);
+  if (!cubeOn()) return;
+  lid = null;
+  syncFaces();
+  animateTo(0, ringAngle(WORKSPACES.indexOf(current)) - 360);
 }
 
 export function goToSection(id: string) {
@@ -141,14 +208,11 @@ export function goToSection(id: string) {
   const to = WORKSPACES.indexOf(id);
 
   if (cubeOn() && to >= 0) {
-    if (from === to) return;
-    // camino más corto alrededor del cubo
-    let delta = (to - from + 4) % 4;
-    if (delta === 3) delta = -1;
-    spin(delta);
+    if (from === to && !lid) return;
+    lid = null;
     setCurrent(id);
     syncFaces();
-    el.scrollTop = 0;
+    animateTo(0, ringAngle(to));
     el.focus({ preventScroll: true });
     return;
   }
@@ -158,7 +222,6 @@ export function goToSection(id: string) {
     return;
   }
 
-  const html = document.documentElement;
   html.dataset.ws = to > from ? 'next' : 'prev';
   const vt = document.startViewTransition(() => {
     el.scrollIntoView({ behavior: 'instant' as ScrollBehavior });
@@ -171,26 +234,27 @@ export function initWorkspaces() {
   // modo cubo según el tamaño de pantalla; al cambiar se recoloca sin animación
   const mq = matchMedia(CUBE_MQ);
   const applyMode = () => {
-    const html = document.documentElement;
     const was = cubeOn();
     html.classList.toggle('cube', mq.matches);
+    stop();
+    delete html.dataset.spin;
+    lid = null;
+    Object.assign(rot, { x: 0, y: -90 * WORKSPACES.indexOf(current), z: 0 });
     const cube = cubeEl();
-    if (cube) {
-      cube.getAnimations().forEach((a) => a.cancel());
-      turns = WORKSPACES.indexOf(current);
-      cube.style.transform = mq.matches ? restTransform(cube.clientWidth / 2, turns) : '';
-    }
+    if (mq.matches) render();
+    else if (cube) cube.style.transform = '';
+    // en el cubo la terminal vive fuera, como una ventana más del escritorio
+    const desktop = document.querySelector('.desktop');
+    const home = document.querySelector(mq.matches ? '#dock' : '.hero__grid');
+    if (desktop && home && desktop.parentElement !== home) home.append(desktop);
     syncFaces();
     if (was && !mq.matches) document.getElementById(current)?.scrollIntoView({ behavior: 'instant' as ScrollBehavior });
   };
   mq.addEventListener('change', applyMode);
   applyMode();
   initWheel();
+  initDrag();
   initTilt();
-  addEventListener('resize', () => {
-    const cube = cubeEl();
-    if (cube && cubeOn() && !cube.getAnimations().length) cube.style.transform = restTransform(cube.clientWidth / 2, turns);
-  });
 
   // sección visible (solo en modo scroll; en el cubo manda el giro)
   const io = new IntersectionObserver(
@@ -215,15 +279,19 @@ export function initWorkspaces() {
     goToSection(id);
   });
 
-  // 1-4 como Super+1..4 y flechas laterales para girar el cubo (fuera de campos de texto)
+  // 1-4 como Super+1..4 y flechas para girar el cubo (fuera de campos de texto)
   document.addEventListener('keydown', (e) => {
     const target = e.target;
     if (e.ctrlKey || e.metaKey || e.altKey) return;
     if (target instanceof Element && target.matches('input, textarea, [contenteditable]')) return;
     const i = WORKSPACES.indexOf(current);
-    if (cubeOn() && (e.key === 'ArrowRight' || e.key === 'ArrowLeft')) {
+    if (cubeOn() && e.key.startsWith('Arrow')) {
       e.preventDefault();
-      return goToSection(WORKSPACES[(i + (e.key === 'ArrowRight' ? 1 : 3)) % 4]);
+      if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+        return goToSection(lid ? current : WORKSPACES[mod4(i + (e.key === 'ArrowRight' ? 1 : -1))]);
+      }
+      const want: Lid = e.key === 'ArrowUp' ? 'top' : 'bottom';
+      return lid ? (lid === want ? undefined : goToSection(current)) : showLid(want);
     }
     const id = WORKSPACES[Number(e.key) - 1];
     if (id) goToSection(id);

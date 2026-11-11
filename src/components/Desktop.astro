@@ -14,10 +14,6 @@ interface Props {
 
 const { lang } = Astro.props;
 const t = useTranslations(lang);
-const chips =
-  lang === 'es'
-    ? ['help', 'kitty', 'cmatrix', 'cava', 'tema', 'sudo hire-me']
-    : ['help', 'kitty', 'cmatrix', 'cava', 'theme', 'sudo hire-me'];
 const now = new Date();
 const age = now.getFullYear() - SITE.birth.year - (now.getMonth() + 1 < SITE.birth.month ? 1 : 0);
 ---
@@ -26,11 +22,6 @@ const age = now.getFullYear() - SITE.birth.year - (now.getMonth() + 1 < SITE.bir
   <div class="tiles" data-count="2">
     <Terminal lang={lang} />
     <Btop lang={lang} />
-  </div>
-
-  <div class="chips" aria-label={t.terminal.hint}>
-    <span class="chips__label">{t.terminal.hint}</span>
-    {chips.map((c) => <button type="button" class="chip" data-cmd={c}>{c}</button>)}
   </div>
 
   <template id="kitty-tpl">
@@ -111,36 +102,6 @@ const age = now.getFullYear() - SITE.birth.year - (now.getMonth() + 1 < SITE.bir
       opacity: 0;
       transform: scale(0.85);
     }
-  }
-
-  .chips {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.45rem;
-    font-size: 0.8rem;
-  }
-  .chips__label {
-    color: var(--muted);
-  }
-  .chip {
-    padding: 0.3rem 0.7rem;
-    border: 1px dashed var(--border);
-    border-radius: 999px;
-    background: none;
-    color: var(--fg);
-    font: inherit;
-    cursor: pointer;
-    transition: border-color 0.2s, color 0.2s, background-color 0.2s;
-  }
-  .chip::before {
-    content: '$ ';
-    color: var(--accent);
-  }
-  .chip:hover {
-    border-style: solid;
-    border-color: var(--accent);
-    background: color-mix(in srgb, var(--accent) 10%, transparent);
   }
 
   @media (max-width: 640px) {
