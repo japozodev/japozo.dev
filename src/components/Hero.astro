@@ -52,14 +52,14 @@ const t = useTranslations(lang);
     padding-block: clamp(2.5rem, 6vw, 4rem);
     isolation: isolate;
   }
-  /* wallpaper: degradado tramado en píxeles (ver src/pages/wallpaper.svg.ts) */
+  /* wallpaper: pistas de placa de circuito (ver src/pages/wallpaper.svg.ts) */
   .hero__bg {
     position: absolute;
     inset: 0;
     z-index: -1;
-    background: linear-gradient(135deg, var(--accent-2), var(--accent));
-    -webkit-mask: url('/wallpaper.svg') right bottom / cover no-repeat;
-    mask: url('/wallpaper.svg') right bottom / cover no-repeat;
+    background: var(--accent);
+    -webkit-mask: url('/wallpaper.svg') center / cover no-repeat;
+    mask: url('/wallpaper.svg') center / cover no-repeat;
     opacity: 0.26;
   }
   .hero__grid {
@@ -107,23 +107,33 @@ const t = useTranslations(lang);
     color: var(--accent);
     text-shadow: 0 0 30px var(--glow);
   }
-  /* glitch al pasar el ratón */
+  /* glitch cyberpunk: tiras del propio nombre que se desplazan, sin colores extra.
+     Salta solo cada pocos segundos y se queda fijo al pasar el ratón */
+  .hero__name {
+    animation: jolt 7s steps(1) infinite;
+  }
   .hero__name::before,
   .hero__name::after {
     content: attr(data-text);
     position: absolute;
     inset: 0;
     opacity: 0;
+    text-shadow: none;
+    pointer-events: none;
   }
-  .hero__name:hover::before {
-    opacity: 0.8;
-    color: var(--info);
-    animation: glitch 0.35s steps(2) infinite;
+  .hero__name::before {
+    animation: tear-a 7s steps(1) infinite;
   }
+  .hero__name::after {
+    color: var(--fg);
+    animation: tear-b 7s steps(1) infinite;
+  }
+  .hero__name:hover {
+    animation-duration: 0.9s;
+  }
+  .hero__name:hover::before,
   .hero__name:hover::after {
-    opacity: 0.8;
-    color: var(--danger);
-    animation: glitch 0.35s steps(2) infinite reverse;
+    animation-duration: 0.9s;
   }
   .hero__cursor {
     display: inline-block;
@@ -184,19 +194,28 @@ const t = useTranslations(lang);
       box-shadow: 0 0 0 0 transparent;
     }
   }
-  @keyframes glitch {
-    0% {
-      transform: translate(2px, -1px);
-      clip-path: inset(10% 0 55% 0);
-    }
-    50% {
-      transform: translate(-2px, 1px);
-      clip-path: inset(60% 0 5% 0);
-    }
-    100% {
-      transform: translate(1px, 2px);
-      clip-path: inset(30% 0 35% 0);
-    }
+  /* el glitch ocupa solo el tramo final del ciclo; con hover el ciclo dura menos */
+  @keyframes jolt {
+    0%, 86%, 100% { transform: none; }
+    88% { transform: translateX(0.03em) skewX(-6deg); }
+    91% { transform: translateX(-0.02em); }
+    94% { transform: skewX(4deg); }
+    97% { transform: translateX(0.015em); }
+  }
+  @keyframes tear-a {
+    0%, 86%, 100% { opacity: 0; }
+    87% { opacity: 1; clip-path: inset(14% 0 66% 0); transform: translateX(-0.09em); }
+    90% { opacity: 1; clip-path: inset(62% 0 20% 0); transform: translateX(0.07em); }
+    93% { opacity: 1; clip-path: inset(38% 0 48% 0); transform: translateX(-0.05em); }
+    96% { opacity: 1; clip-path: inset(80% 0 6% 0); transform: translateX(0.11em); }
+    98% { opacity: 1; clip-path: inset(4% 0 86% 0); transform: translateX(-0.04em); }
+  }
+  @keyframes tear-b {
+    0%, 86%, 100% { opacity: 0; }
+    88% { opacity: 0.9; clip-path: inset(46% 0 50% 0); transform: translateX(0.12em); }
+    92% { opacity: 0.9; clip-path: inset(22% 0 75% 0); transform: translateX(-0.1em); }
+    95% { opacity: 0.9; clip-path: inset(70% 0 27% 0); transform: translateX(0.06em); }
+    98% { opacity: 0; }
   }
 </style>
 

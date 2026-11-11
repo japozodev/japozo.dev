@@ -62,6 +62,17 @@ const age = now.getFullYear() - SITE.birth.year - (now.getMonth() + 1 < SITE.bir
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     grid-template-areas: 'main main' 'btop kitty';
   }
+  /* ventana maximizada: ocupa todo el mosaico */
+  .tiles:has(:global(.is-max)) :global(.tile:not(.is-max)) {
+    display: none;
+  }
+  .tiles:has(:global(.is-max)) {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: 'main';
+  }
+  .tiles :global(.tile.is-max) {
+    grid-area: main;
+  }
   .tiles :global(.tile--main) {
     grid-area: main;
   }

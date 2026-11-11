@@ -33,15 +33,24 @@ html.cube #main {
   overflow: hidden;
   background: var(--bg);
 }
-/* el escritorio de detrás del cubo: el mismo tramado del wallpaper */
+/* el escritorio de detrás del cubo: liso, con scanlines de monitor CRT y una
+   franja de refresco que baja despacio */
 html.cube #main::before {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, var(--accent-2), var(--accent));
-  -webkit-mask: url('/wallpaper.svg') center / cover no-repeat;
-  mask: url('/wallpaper.svg') center / cover no-repeat;
-  opacity: 0.2;
+  background:
+    linear-gradient(transparent, color-mix(in srgb, var(--accent) 9%, transparent) 85%, transparent) 0 0 / 100% 9rem no-repeat,
+    repeating-linear-gradient(to bottom, transparent 0 3px, color-mix(in srgb, var(--accent) 8%, transparent) 3px 4px);
+  animation: refresh 7s linear infinite;
+}
+@keyframes refresh {
+  from {
+    background-position: 0 -9rem, 0 0;
+  }
+  to {
+    background-position: 0 100vh, 0 0;
+  }
 }
 html.cube .stage {
   position: absolute;
@@ -393,6 +402,8 @@ html.cube .lid p {
 }
 html.cube .lid__logo {
   margin: 0 0 0.6rem;
+  /* cada línea del logo empieza en la misma columna */
+  text-align: left;
   font: inherit;
   font-size: 1.3rem;
   line-height: 1.2;

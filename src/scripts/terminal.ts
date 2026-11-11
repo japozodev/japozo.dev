@@ -2,6 +2,7 @@ import { SOCIAL } from '../data/site';
 import { THEMES } from '../data/themes';
 import { applyTheme, currentTheme } from './theme';
 import { getEmail } from './email';
+import { crab } from './crab';
 import { goToSection, spinCube } from './workspaces';
 import { cava, cmatrix } from './effects';
 import { hyprctl } from './hyprctl';
@@ -23,6 +24,15 @@ const BOOT_LINES = [
   '[    2.104512] japozo.dev: portfolio v27 ready',
 ];
 
+const SHUTDOWN_LINES = [
+  '[  OK  ] Stopped target Graphical Interface.',
+  '[  OK  ] Stopped Hyprland compositor.',
+  '[  OK  ] Stopped japozo.dev portfolio service.',
+  '[  OK  ] Unmounted /home/pozo.',
+  '[  OK  ] Reached target System Reboot.',
+  'Rebooting.',
+];
+
 type Lang = 'es' | 'en';
 
 const TXT = {
@@ -42,6 +52,7 @@ const TXT = {
       ['cmatrix · cava', 'efectos (cualquier tecla para salir)'],
       ['hyprctl', 'ajusta el escritorio en vivo'],
       ['lang en', 'switch to English'],
+      ['reboot', 'reinicia el sistema'],
       ['history · date · clear', 'lo de siempre'],
     ],
     whoami: 'pozo, desarrollador frontend en Gijón. Ex técnico de hardware, ahora picando código.',
@@ -55,7 +66,8 @@ const TXT = {
     sudo: 'pozo no está en el archivo sudoers. Este incidente será reportado.',
     hire: '[sudo] contraseña para pozo: ********\n<span class="ok">Acceso concedido.</span> Me encanta la idea. Te llevo a contacto...',
     rm: 'Buen intento. Este sistema está protegido por café y copias de seguridad.',
-    exit: 'Esta es la terminal principal, no se puede cerrar. Prueba en una <span class="ok">kitty</span>.',
+    exit: 'logout cancelado. Buena elección: te llevo a contacto.',
+    exitConfirm: '¿Seguro que quieres cerrar la pestaña?\n\n¿No preferirías quedarte y escribirme? Pulsa Cancelar y te llevo a contacto.',
     opening: (t: string) => `Abriendo ${t}...`,
     neofetch: 'neofetch: descansa en paz. Prueba con <span class="ok">fastfetch</span>.',
     langSwitch: 'Cambiando de idioma...',
@@ -63,6 +75,7 @@ const TXT = {
     kittyOpen: 'Abriendo kitty...',
     cube: 'compiz --replace &amp;  <span class="c-muted"># como en 2008</span>',
     cubeOff: 'cube: la pantalla es demasiado pequeña para el cubo.',
+    rebootKitty: 'reboot: hazlo desde la terminal principal.',
   },
   en: {
     welcome: 'Welcome to <b>japozo.dev</b>. Type <span class="ok">help</span> to list the commands.',
@@ -80,6 +93,7 @@ const TXT = {
       ['cmatrix · cava', 'effects (any key to quit)'],
       ['hyprctl', 'tweak the desktop live'],
       ['lang es', 'cambiar a español'],
+      ['reboot', 'restart the system'],
       ['history · date · clear', 'the usual'],
     ],
     whoami: 'pozo, frontend developer in Gijón, Spain. Former hardware tech, now writing code.',
@@ -93,7 +107,8 @@ const TXT = {
     sudo: 'pozo is not in the sudoers file. This incident will be reported.',
     hire: '[sudo] password for pozo: ********\n<span class="ok">Access granted.</span> Love the idea. Taking you to contact...',
     rm: 'Nice try. This system is protected by coffee and backups.',
-    exit: "This is the main terminal, it can't be closed. Try it in a <span class=\"ok\">kitty</span>.",
+    exit: 'logout cancelled. Good call: taking you to contact.',
+    exitConfirm: "Sure you want to close the tab?\n\nWouldn't you rather stay and drop me a line? Hit Cancel and I'll take you to contact.",
     opening: (t: string) => `Opening ${t}...`,
     neofetch: 'neofetch: rest in peace. Try <span class="ok">fastfetch</span>.',
     langSwitch: 'Switching language...',
@@ -101,6 +116,7 @@ const TXT = {
     kittyOpen: 'Opening kitty...',
     cube: 'compiz --replace &amp;  <span class="c-muted"># like it is 2008</span>',
     cubeOff: 'cube: the screen is too small for the cube.',
+    rebootKitty: 'reboot: run it from the main terminal.',
   },
 };
 
@@ -121,7 +137,7 @@ const SECTIONS: Record<string, string> = {
 const COMMANDS = [
   'help', 'whoami', 'fastfetch', 'ls', 'cat bio.txt', 'cd', 'email', 'github', 'linkedin',
   'tema', 'theme', 'kitty', 'cube', 'cmatrix', 'cava', 'hyprctl', 'lang', 'history', 'date', 'clear',
-  'sudo hire-me', 'exit', 'proyectos', 'projects', 'contacto', 'contact', 'sobre-mi', 'about', 'echo',
+  'sudo hire-me', 'exit', 'reboot', 'proyectos', 'projects', 'contacto', 'contact', 'sobre-mi', 'about', 'echo',
 ];
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -180,7 +196,33 @@ export function createTerminal(root: HTMLElement, opts: TerminalOptions = {}): T
 
   const goTo = (id: string) => goToSection(id);
 
-  const run = (raw: string) => {
+  // exit o el botón de cerrar: una kitty se cierra sin más; la terminal principal
+  // pregunta antes de abandonar la página
+  const quit = () => {
+    if (opts.close) return opts.close();
+    if (!confirm(T.exitConfirm)) {
+      print(T.exit, 'c-magenta');
+      return goTo('contacto');
+    }
+    window.close(); // solo funciona si la pestaña la abrió un script
+    setTimeout(() => (location.href = 'about:blank'), 150);
+  };
+
+  // botones de la barra de título
+  root.querySelector('.window__ctl')?.addEventListener('click', (e) => {
+    const action = (e.target as Element).closest<HTMLElement>('[data-win]')?.dataset.win;
+    if (action === 'close') return quit();
+    if (action === 'min') {
+      root.classList.remove('is-max');
+      root.classList.toggle('is-min');
+    }
+    if (action === 'max') {
+      root.classList.remove('is-min');
+      root.classList.toggle('is-max');
+    }
+  });
+
+  const exec = (raw: string) => {
     const cmdline = raw.trim();
     print(promptHtml(cmdline));
     if (!cmdline) return;
@@ -287,11 +329,24 @@ export function createTerminal(root: HTMLElement, opts: TerminalOptions = {}): T
         return print(T.rm, 'c-warn');
       case 'exit':
       case 'logout':
-        if (opts.close) return opts.close();
-        return print(T.exit, 'c-magenta');
+        return quit();
+      // easter egg: no sale en help ni en el autocompletado
+      case 'claude':
+        print('clac clac', 'c-muted');
+        return void crab(term);
+      case 'reboot':
+        if (!opts.boot) return print(T.rebootKitty, 'c-warn');
+        return void reboot();
       default:
         return print(T.notFound(esc(cmd)), 'c-danger');
     }
+  };
+
+  // tras cada comando la vista baja hasta el prompt (fastfetch añade su salida
+  // después de imprimir la línea, así que no basta con el scroll de print)
+  const run = (raw: string) => {
+    exec(raw);
+    scrollDown();
   };
 
   const typeAndRun = async (cmd: string, speed = 45) => {
@@ -346,6 +401,26 @@ export function createTerminal(root: HTMLElement, opts: TerminalOptions = {}): T
     history.length = 0;
     histIdx = 0;
     print(T.welcome);
+  };
+
+  // reboot: apaga los servicios, limpia la pantalla y repite el arranque
+  let rebooting = false;
+  const reboot = async () => {
+    if (rebooting) return;
+    rebooting = true;
+    skipBoot = false;
+    if (!reduceMotion) {
+      term.dataset.booting = '';
+      for (const l of SHUTDOWN_LINES) {
+        print(esc(l).replace(/\[\s+OK\s+\]/, '[<span class="ok">  OK  </span>]'), 'boot');
+        await sleep(90 + Math.random() * 90);
+      }
+      await sleep(500);
+    }
+    out.innerHTML = '';
+    await boot();
+    rebooting = false;
+    input.focus({ preventScroll: true });
   };
 
   // --- interacción ---

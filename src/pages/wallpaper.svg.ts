@@ -1,50 +1,72 @@
-// Wallpaper del hero: degradado tramado (dithering Bayer 8x8) en píxeles grandes.
-// Se usa como máscara en CSS, así el color sale del tema activo.
+// Wallpaper: pistas de una placa de circuito (buses que entran por los lados, giran
+// a 45° y acaban en vías o en un integrado). Se genera con una semilla fija y se usa
+// como máscara en CSS, así el color sale del tema activo.
 import type { APIRoute } from 'astro';
 
-const W = 192;
-const H = 108;
+const W = 1920;
+const H = 1080;
+const S = 12; // separación entre pistas de un mismo bus
+const K = Math.SQRT2 - 1; // desplazamiento del codo para que las pistas sigan paralelas
 
-const BAYER = [
-  [0, 32, 8, 40, 2, 34, 10, 42],
-  [48, 16, 56, 24, 50, 18, 58, 26],
-  [12, 44, 4, 36, 14, 46, 6, 38],
-  [60, 28, 52, 20, 62, 30, 54, 22],
-  [3, 35, 11, 43, 1, 33, 9, 41],
-  [51, 19, 59, 27, 49, 17, 57, 25],
-  [15, 47, 7, 39, 13, 45, 5, 37],
-  [63, 31, 55, 23, 61, 29, 53, 21],
-];
+// generador determinista: el dibujo es siempre el mismo
+let seed = 2027;
+const rnd = () => (seed = (seed * 1664525 + 1013904223) >>> 0) / 2 ** 32;
+const between = (a: number, b: number) => a + rnd() * (b - a);
+const n = (v: number) => +v.toFixed(1);
 
-// intensidad 0..1: foco fuerte abajo a la derecha y uno suave arriba a la izquierda
-const intensity = (x: number, y: number) => {
-  const nx = x / W;
-  const ny = y / H;
-  const d1 = Math.hypot((nx - 1.02) * 1.6, ny - 1.05);
-  const d2 = Math.hypot((nx + 0.05) * 1.6, ny + 0.1);
-  const a = Math.max(0, 1 - d1 / 1.25) ** 1.7;
-  const b = 0.3 * Math.max(0, 1 - d2 / 0.6) ** 2;
-  return Math.min(1, a + b);
-};
+function side(mirror: boolean) {
+  const x = (v: number) => n(mirror ? W - v : v);
+  let lines = '';
+  let pads = '';
+  let cursor = between(10, 60);
+  let chip = 0;
 
-function buildPath() {
-  let d = '';
-  for (let y = 0; y < H; y++) {
-    let run = -1;
-    for (let x = 0; x <= W; x++) {
-      const on = x < W && intensity(x, y) > (BAYER[y % 8][x % 8] + 0.5) / 64;
-      if (on && run < 0) run = x;
-      if (!on && run >= 0) {
-        d += `M${run} ${y}h${x - run}v1h${run - x}z`;
-        run = -1;
+  while (cursor < H - 40) {
+    const k = 2 + Math.floor(rnd() * 6);
+    const dy = rnd() < 0.2 ? 0 : (rnd() < 0.5 ? -1 : 1) * S * Math.round(between(2, 10));
+    const y0 = cursor + (dy < 0 ? -dy : 0);
+    const x1 = between(90, 420);
+    const x2 = x1 + Math.abs(dy);
+    const xe = Math.min(x2 + between(70, 300), W * 0.38);
+    const toChip = k >= 4 && rnd() < 0.4;
+    const stagger = rnd() < 0.5 ? 1 : -1;
+
+    for (let i = 0; i < k; i++) {
+      const y = y0 + i * S;
+      const shift = -Math.sign(dy) * i * S * K;
+      const end = toChip ? xe : xe - (stagger > 0 ? i : k - 1 - i) * S * 1.5;
+      lines += `<path d="M${x(0)} ${n(y)}H${x(x1 + shift)}L${x(x2 + shift)} ${n(y + dy)}H${x(end - (toChip ? 0 : 4))}"/>`;
+      if (toChip) pads += `<rect x="${x(mirror ? end + 9 : end)}" y="${n(y + dy - 2.5)}" width="9" height="5"/>`;
+      else lines += `<circle cx="${x(end)}" cy="${n(y + dy)}" r="4"/>`;
+    }
+
+    if (toChip) {
+      // integrado: patillas a ambos lados y un par de pistas que siguen hasta una vía
+      const cw = between(70, 120);
+      const top = y0 + dy - 12;
+      const ch = (k - 1) * S + 24;
+      const left = xe + 9;
+      lines += `<rect x="${x(mirror ? left + cw : left)}" y="${n(top)}" width="${n(cw)}" height="${n(ch)}"/>`;
+      lines += `<circle cx="${x(left + 10)}" cy="${n(top + 10)}" r="2.5"/>`;
+      pads += `<text x="${x(left + cw / 2)}" y="${n(top + ch / 2 + 4)}" text-anchor="middle">JPZ${27 + chip++}</text>`;
+      for (let i = 0; i < k; i++) {
+        const y = y0 + dy + i * S;
+        const px = left + cw;
+        pads += `<rect x="${x(mirror ? px + 9 : px)}" y="${n(y - 2.5)}" width="9" height="5"/>`;
+        if (rnd() < 0.5) {
+          const len = between(30, 110);
+          lines += `<path d="M${x(px + 9)} ${n(y)}H${x(px + 9 + len - 4)}"/><circle cx="${x(px + 9 + len)}" cy="${n(y)}" r="4"/>`;
+        }
       }
     }
+
+    cursor = y0 + (k - 1) * S + Math.max(dy, 0) + between(34, 90);
   }
-  return d;
+  return { lines, pads };
 }
 
-export const GET: APIRoute = () =>
-  new Response(
-    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMaxYMax slice" shape-rendering="crispEdges"><path d="${buildPath()}"/></svg>`,
-    { headers: { 'Content-Type': 'image/svg+xml' } },
-  );
+const left = side(false);
+const right = side(true);
+const SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid slice"><g fill="none" stroke="#000" stroke-width="1.6" stroke-linejoin="round">${left.lines}${right.lines}</g><g fill="#000" font-family="monospace" font-size="11">${left.pads}${right.pads}</g></svg>`;
+
+export const GET: APIRoute = () => new Response(SVG, { headers: { 'Content-Type': 'image/svg+xml' } });

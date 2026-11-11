@@ -14,7 +14,7 @@ const { lang, kitty = false } = Astro.props;
 const t = useTranslations(lang);
 ---
 
-<Window title={kitty ? 'kitty: ~' : t.terminal.title} class:list={['tile', 'terminal', kitty ? 'tile--kitty' : 'tile--main']}>
+<Window title={kitty ? 'kitty: ~' : t.terminal.title} controls={t.terminal.win} class:list={['tile', 'terminal', kitty ? 'tile--kitty' : 'tile--main']}>
   <div class="term">
     <div class="term__out" role="log" aria-live="polite"></div>
     <form class="term__line" autocomplete="off">
@@ -31,7 +31,7 @@ const t = useTranslations(lang);
 <style>
   /* ventana inactiva translúcida con blur, como en Hyprland: opaca al pasar el ratón o al escribir */
   /* .tile.terminal para ganar en especificidad a .window */
-  .tile.terminal {
+  :global(.tile.terminal) {
     position: relative;
     background: color-mix(in srgb, var(--bg-alt) var(--inactive-alpha), transparent);
     backdrop-filter: blur(14px) saturate(1.3);
@@ -39,17 +39,34 @@ const t = useTranslations(lang);
     box-shadow: 0 24px 60px -24px rgb(0 0 0 / 0.6);
     transition: background-color 0.35s ease;
   }
-  .tile.terminal :global(.window__bar) {
+  :global(.tile.terminal) :global(.window__bar) {
     background: color-mix(in srgb, var(--surface) var(--inactive-alpha), transparent);
     transition: background-color 0.35s ease;
   }
-  .tile.terminal:hover,
-  .tile.terminal:focus-within {
+  :global(.tile.terminal):hover,
+  :global(.tile.terminal):focus-within {
     background: var(--bg-alt);
   }
-  .tile.terminal:hover :global(.window__bar),
-  .tile.terminal:focus-within :global(.window__bar) {
+  :global(.tile.terminal):hover :global(.window__bar),
+  :global(.tile.terminal):focus-within :global(.window__bar) {
     background: var(--surface);
+  }
+  /* con el foco, la barra de título va en el color de acento */
+  :global(.tile.terminal):focus-within :global(.window__bar) {
+    background: var(--accent);
+    color: var(--accent-ink);
+    border-bottom-color: var(--accent);
+  }
+  /* minimizada: solo queda la barra */
+  :global(.tile.terminal).is-min {
+    align-self: start;
+  }
+  :global(.tile.terminal).is-min :global(.window__body) {
+    display: none;
+  }
+  :global(.tile.terminal).is-min :global(.window__bar) {
+    border-bottom: 0;
+    border-radius: calc(var(--radius) - var(--win-border));
   }
   .term {
     position: relative;
@@ -116,7 +133,7 @@ const t = useTranslations(lang);
     color: var(--surface-2);
   }
   /* kitty: ocupa el alto de su celda del mosaico */
-  .tile--kitty .term {
+  :global(.tile--kitty) .term {
     height: 100%;
     min-height: 12rem;
   }

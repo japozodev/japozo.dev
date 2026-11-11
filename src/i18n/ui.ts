@@ -26,6 +26,7 @@ export const ui = {
       title: 'pozo@japozo: ~',
       inputLabel: 'Escribe un comando',
       skip: 'click para saltar',
+      win: { min: 'Minimizar', max: 'Maximizar', close: 'Cerrar' },
       ff: [
         ['Rol', 'Desarrollador frontend'],
         ['Base', 'Gijón, Asturias'],
@@ -93,6 +94,7 @@ export const ui = {
       title: 'pozo@japozo: ~',
       inputLabel: 'Type a command',
       skip: 'click to skip',
+      win: { min: 'Minimize', max: 'Maximize', close: 'Close' },
       ff: [
         ['Role', 'Frontend developer'],
         ['Based', 'Gijón, Spain'],

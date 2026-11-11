@@ -1,19 +1,36 @@
 ---
-// Ventana estilo Hyprland: sin botones, borde gris si está inactiva y borde
-// en degradado (accent -> accent-2) cuando está activa (hover o foco dentro).
+// Ventana estilo Hyprland: borde gris si está inactiva y borde en degradado
+// (accent -> accent-2) cuando está activa (hover o foco dentro). Con `controls`
+// lleva a la derecha los botones de minimizar, maximizar y cerrar de Manjaro (KDE).
 interface Props {
   title?: string;
   class?: string;
+  controls?: { min: string; max: string; close: string };
 }
 
-const { title, class: className } = Astro.props;
+const { title, class: className, controls } = Astro.props;
 ---
 
 <div class:list={['window', className]}>
   {
     title && (
-      <div class="window__bar" aria-hidden="true">
-        <span class="window__title">{title}</span>
+      <div class="window__bar">
+        <span class="window__title" aria-hidden="true">{title}</span>
+        {
+          controls && (
+            <div class="window__ctl">
+              <button type="button" data-win="min" aria-label={controls.min} title={controls.min}>
+                <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5" /></svg>
+              </button>
+              <button type="button" data-win="max" aria-label={controls.max} title={controls.max}>
+                <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 7.5 6 4l3.5 3.5" /></svg>
+              </button>
+              <button type="button" data-win="close" aria-label={controls.close} title={controls.close}>
+                <svg viewBox="0 0 12 12" aria-hidden="true"><path d="m3 3 6 6M9 3 3 9" /></svg>
+              </button>
+            </div>
+          )
+        }
       </div>
     )
   }
@@ -63,14 +80,57 @@ const { title, class: className } = Astro.props;
     gap: 0.5rem;
     padding: 0.4rem 0.8rem;
     border-bottom: 1px solid var(--border);
+    /* sigue la curva de la ventana para que el fondo no asome por las esquinas */
+    border-radius: calc(var(--radius) - var(--win-border)) calc(var(--radius) - var(--win-border)) 0 0;
     font-size: 0.75rem;
     color: var(--muted);
     user-select: none;
   }
   .window__title {
+    flex: 1;
+    min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+  }
+  .window__ctl {
+    display: flex;
+    gap: 0.25rem;
+    margin-block: -0.15rem;
+  }
+  .window__ctl button {
+    display: grid;
+    place-items: center;
+    width: 1.35rem;
+    height: 1.35rem;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: none;
+    color: inherit;
+    cursor: pointer;
+    transition: background-color 0.15s, color 0.15s;
+  }
+  .window__ctl svg {
+    width: 0.7rem;
+    height: 0.7rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .window__ctl button:hover {
+    background: color-mix(in srgb, currentColor 22%, transparent);
+  }
+  .window__ctl button[data-win='close']:hover {
+    background: var(--danger);
+    color: #fff;
+  }
+  .window__ctl button:focus-visible {
+    outline-color: currentColor;
+    outline-offset: 1px;
+    border-radius: 50%;
   }
   .window__body {
     flex: 1;
