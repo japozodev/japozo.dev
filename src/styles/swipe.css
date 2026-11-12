@@ -142,7 +142,7 @@ html.swipe .hero__hello {
   margin-bottom: 0.35rem;
 }
 html.swipe .hero__role {
-  font-size: clamp(1.05rem, 4.6vw, 1.4rem);
+  font-size: clamp(0.95rem, 4.2vw, 1.4rem);
 }
 html.swipe .hero__lead {
   margin-bottom: 1.5rem;

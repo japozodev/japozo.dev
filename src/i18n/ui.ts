@@ -17,6 +17,8 @@ export const ui = {
       kicker: 'desarrollador web · gijón, asturias',
       hello: 'Hola, soy',
       roles: ['desarrollador web', 'wordpress y astro', 'de la idea al servidor', '20 años de experiencia en sistemas', 'de lo analógico a lo digital'],
+      // en pantallas estrechas, para que la frase larga no salte a dos líneas
+      rolesShort: { '20 años de experiencia en sistemas': '20Y de experiencia en sistemas' } as Record<string, string>,
       lead: 'Diseño, desarrollo y pongo en producción webs cuidadas y memorables. Antes pasé 20 años como técnico de seguridad y sistemas: sé llevar un proyecto entero, del primer briefing al último cable.',
       ctaProjects: 'mis proyectos',
       ctaContact: 'hablemos',
@@ -86,6 +88,7 @@ export const ui = {
       kicker: 'web developer · gijón, spain',
       hello: "Hi, I'm",
       roles: ['web developer', 'wordpress and astro', 'from idea to server', '20 years of systems experience', 'from analog to digital'],
+      rolesShort: { '20 years of systems experience': '20Y of systems experience' } as Record<string, string>,
       lead: 'I design, build and ship polished, memorable websites. Before that I spent 20 years as a security and systems technician: I know how to run a whole project, from the first brief to the last cable.',
       ctaProjects: 'my projects',
       ctaContact: "let's talk",

@@ -23,7 +23,7 @@ const t = useTranslations(lang);
       <p class="hero__role">
         <span class="c-accent" aria-hidden="true">❯ </span>
         <span class="sr-only">{t.hero.roles[0]}</span>
-        <span id="role-rotator" aria-hidden="true" data-roles={JSON.stringify(t.hero.roles)}>{t.hero.roles[0]}</span>
+        <span id="role-rotator" aria-hidden="true" data-roles={JSON.stringify(t.hero.roles)} data-short={JSON.stringify(t.hero.rolesShort)}>{t.hero.roles[0]}</span>
       </p>
       <p class="hero__lead prose">{t.hero.lead}</p>
       <div class="hero__cta">
@@ -227,18 +227,22 @@ const t = useTranslations(lang);
   const el = document.getElementById('role-rotator');
   if (el && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
     const roles: string[] = JSON.parse(el.dataset.roles || '[]');
+    const short: Record<string, string> = JSON.parse(el.dataset.short || '{}');
+    // en móvil, la versión corta de las frases largas; se mira en cada vuelta por si se gira la pantalla
+    const narrow = matchMedia('(max-width: 600px)');
+    const role = (i: number) => (narrow.matches && short[roles[i]]) || roles[i];
     const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
     (async () => {
       let i = 0;
       while (roles.length > 1) {
         await sleep(2600);
-        for (let n = roles[i].length; n >= 0; n--) {
-          el.textContent = roles[i].slice(0, n);
+        for (let n = role(i).length; n >= 0; n--) {
+          el.textContent = role(i).slice(0, n);
           await sleep(25);
         }
         i = (i + 1) % roles.length;
-        for (let n = 1; n <= roles[i].length; n++) {
-          el.textContent = roles[i].slice(0, n);
+        for (let n = 1; n <= role(i).length; n++) {
+          el.textContent = role(i).slice(0, n);
           await sleep(55);
         }
       }
