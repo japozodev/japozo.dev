@@ -11,19 +11,7 @@ const shot = (name: string) => (shots[`../assets/projects/${name}.png`] ?? shots
 export type Lang = 'es' | 'en';
 type Localized = Record<Lang, string>;
 
-export const SITE = {
-  name: 'J. A. Pozo',
-  handle: 'japozo',
-  domain: 'https://japozo.dev',
-  // base64 para que los bots no lo lean del HTML; se decodifica al hacer click
-  emailB64: 'cG96b0BqYXBvem8uZGV2',
-  birth: { year: 1982, month: 4 },
-};
-
-export const SOCIAL = {
-  github: 'https://github.com/japozodev',
-  linkedin: 'https://www.linkedin.com/in/joseantoniopozogonzalez/',
-};
+export { SITE, SOCIAL } from './profile';
 
 export interface Project {
   slug: string;
@@ -49,8 +37,8 @@ export const PROJECTS: Project[] = [
     year: '2025',
     status: 'online',
     desc: {
-      es: 'Web corporativa para una empresa de topografía, dentro del programa Kit Digital. Del briefing al dominio en producción: diseño, desarrollo, hosting y SEO.',
-      en: 'Corporate site for a land surveying company, part of the Kit Digital programme. From brief to live domain: design, build, hosting and SEO.',
+      es: 'Web de una empresa de topografía asturiana: levantamientos, láser escáner y gestión catastral. Llegó por el Kit Digital, pero se hizo un proyecto a medida.',
+      en: 'Site for an Asturian land surveying firm: surveys, laser scanning and land registry work. It came through Kit Digital, but it became a custom-built project.',
     },
     role: { es: 'Proyecto completo', en: 'End to end' },
     stack: ['WordPress', 'Elementor', 'SEO'],
@@ -64,8 +52,8 @@ export const PROJECTS: Project[] = [
     year: '2025',
     status: 'online',
     desc: {
-      es: 'Web para un agente de Allianz, dentro del Kit Digital. Diseño a partir del briefing, desarrollo, alta de dominio y hosting, migración a producción y SEO.',
-      en: 'Site for an Allianz agent, part of Kit Digital. Design from the brief, build, domain and hosting setup, migration to production and SEO.',
+      es: 'Web para una agencia de Allianz en Gijón. Una ayuda del Kit Digital que no se quedó en lo mínimo: pensada y montada sección a sección.',
+      en: "Site for an Allianz agency in Gijón. A Kit Digital grant that didn't settle for the bare minimum: planned and built section by section.",
     },
     role: { es: 'Proyecto completo', en: 'End to end' },
     stack: ['WordPress', 'Elementor', 'SEO'],
@@ -79,8 +67,8 @@ export const PROJECTS: Project[] = [
     year: '2025',
     status: 'online',
     desc: {
-      es: 'Web para una consultoría inmobiliaria, dentro del Kit Digital. Me encargué de todo: diseño, desarrollo, servidor y puesta en producción.',
-      en: 'Site for a property consultancy, part of Kit Digital. I handled everything: design, build, server and go-live.',
+      es: 'Web de una consultoría inmobiliaria: compraventa, alquiler, reformas e inversión. Salió del Kit Digital, pero con el mimo de un proyecto propio, y se nota al navegarla.',
+      en: 'Site for a property consultancy: sales, rentals, renovations and investment. It came out of Kit Digital, but with the care of a project of my own, and it shows as you browse it.',
     },
     role: { es: 'Proyecto completo', en: 'End to end' },
     stack: ['WordPress', 'Elementor', 'Hosting'],
@@ -94,11 +82,11 @@ export const PROJECTS: Project[] = [
     year: '2026',
     status: 'online',
     desc: {
-      es: 'Portal de venta de coches de segunda mano. Empezó como un proyecto coral y sigue siendo un trabajo de equipo. Mi parte: darle forma, los plugins a medida, la integración de los formularios con el CRM y el mantenimiento. La 404, una pista de coches sin fin, también es mía.',
-      en: 'Used car sales portal. It started as a joint effort and is still teamwork. My part: shaping it, the custom plugins, the form integration with the CRM and the maintenance. The 404, an endless toy car track, is mine too.',
+      es: 'Portal de venta de coches de segunda mano. Empezó como un proyecto coral y sigue siendo un trabajo de equipo. Mi parte: darle forma, funcionalidades del panel de administración, la integración de los formularios con el CRM y el mantenimiento. La 404, una pista de coches sin fin, también es mía.',
+      en: 'Used car sales portal. It started as a joint effort and is still teamwork. My part: shaping it, features for the admin panel, the form integration with the CRM and the maintenance. The 404, an endless toy car track, is mine too.',
     },
     role: { es: 'Desarrollo y mantenimiento', en: 'Development and maintenance' },
-    stack: ['WordPress', { es: 'Plugins a medida', en: 'Custom plugins' }, 'CRM'],
+    stack: ['Laravel', 'Livewire', 'CRM'],
   },
   {
     slug: 'japozo',
@@ -109,8 +97,8 @@ export const PROJECTS: Project[] = [
     year: '2026',
     status: 'online',
     desc: {
-      es: 'Este portfolio: un escritorio Linux con un cubo de workspaces al estilo Compiz, una terminal que funciona y una versión móvil que gira al deslizar. Astro, CSS 3D y JavaScript a mano.',
-      en: 'This portfolio: a Linux desktop with a Compiz-style workspace cube, a working terminal and a mobile version that spins as you swipe. Astro, 3D CSS and hand-written JavaScript.',
+      es: 'Este portfolio: un escritorio Linux con un cubo de workspaces al estilo Compiz, una terminal que funciona y una versión móvil que gira al deslizar. Astro, CSS 3D y JavaScript.',
+      en: 'This portfolio: a Linux desktop with a Compiz-style workspace cube, a working terminal and a mobile version that spins as you swipe. Astro, 3D CSS and JavaScript.',
     },
     role: { es: 'Idea, diseño y desarrollo', en: 'Concept, design and development' },
     stack: ['Astro', 'CSS 3D', 'JavaScript'],

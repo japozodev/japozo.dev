@@ -15,12 +15,12 @@ const t = useTranslations(lang);
 
 <section id="proyectos" class="section">
   <div class="container">
-    <SectionHeading index="01" path="~/proyectos" cmd="ls -la" title={t.projects.title} lead={t.projects.lead} />
+    <SectionHeading path="~/proyectos" cmd="ls -la" title={t.projects.title} lead={t.projects.lead} />
     <div class="projects">
       {PROJECTS.map((p, i) => <ProjectCard project={p} lang={lang} index={i} />)}
     </div>
     <!-- aviso de que la lista sigue; solo se ve en el cubo -->
-    <p class="projects__more" aria-hidden="true"><b>↓</b> {t.projects.more.replace('{n}', String(PROJECTS.length))}</p>
+    <p class="projects__more" aria-hidden="true"><b>↓</b> {t.projects.more}</p>
   </div>
 </section>
 

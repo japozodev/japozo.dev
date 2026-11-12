@@ -5,10 +5,9 @@ interface Props {
   path: string;
   title: string;
   lead?: string;
-  index: string;
 }
 
-const { cmd, path, title, lead, index } = Astro.props;
+const { cmd, path, title, lead } = Astro.props;
 ---
 
 <header class="sh reveal">
@@ -16,7 +15,7 @@ const { cmd, path, title, lead, index } = Astro.props;
     <span class="ps1"><b>pozo@japozo</b> <i>{path}</i> $</span>
     <span class="sh__typed" style={`--n:${cmd.length}`}>{cmd}</span>
   </p>
-  <h2 class="sh__title"><span class="sh__index" aria-hidden="true">{index}.</span>{title}</h2>
+  <h2 class="sh__title">{title}</h2>
   {lead && <p class="sh__lead prose">{lead}</p>}
 </header>
 
@@ -59,14 +58,7 @@ const { cmd, path, title, lead, index } = Astro.props;
     font-size: clamp(2rem, 1.2rem + 3.5vw, 3.6rem);
     letter-spacing: -0.03em;
   }
-  .sh__index {
-    color: var(--accent);
-    font-size: 0.45em;
-    vertical-align: super;
-    margin-right: 0.5em;
-  }
   .sh__lead {
-    max-width: 60ch;
     margin: 1rem 0 0;
     color: var(--muted);
   }

@@ -16,9 +16,9 @@ export const ui = {
     hero: {
       kicker: 'desarrollador web · gijón, asturias',
       hello: 'Hola, soy',
-      roles: ['desarrollador web', 'wordpress y astro', 'del briefing al servidor', 'ex técnico de sistemas', 'fan de linux'],
-      lead: 'Diseño, desarrollo y pongo en producción webs cuidadas y con carácter. Antes pasé 20 años como técnico de seguridad y sistemas: sé llevar un proyecto entero, del primer briefing al último cable.',
-      ctaProjects: 'ver proyectos',
+      roles: ['desarrollador web', 'wordpress y astro', 'de la idea al servidor', '20 años de experiencia en sistemas', 'de lo analógico a lo digital'],
+      lead: 'Diseño, desarrollo y pongo en producción webs cuidadas y memorables. Antes pasé 20 años como técnico de seguridad y sistemas: sé llevar un proyecto entero, del primer briefing al último cable.',
+      ctaProjects: 'mis proyectos',
       ctaContact: 'hablemos',
       swipe: 'desliza para girar el cubo',
       keys: ['girar', 'workspace', 'tapas', 'arrastrar', 'rotación libre'],
@@ -50,7 +50,7 @@ export const ui = {
       stack: 'stack',
       soon: 'próximamente',
       shotAlt: 'Captura de la web de {name}',
-      more: 'rueda para ver los {n} proyectos',
+      more: 'rueda para ver más proyectos',
     },
     about: {
       title: 'Sobre mí',
@@ -85,9 +85,9 @@ export const ui = {
     hero: {
       kicker: 'web developer · gijón, spain',
       hello: "Hi, I'm",
-      roles: ['web developer', 'wordpress and astro', 'from brief to server', 'former systems tech', 'linux fan'],
-      lead: 'I design, build and ship polished websites with character. Before that I spent 20 years as a security and systems technician: I know how to run a whole project, from the first brief to the last cable.',
-      ctaProjects: 'see projects',
+      roles: ['web developer', 'wordpress and astro', 'from idea to server', '20 years of systems experience', 'from analog to digital'],
+      lead: 'I design, build and ship polished, memorable websites. Before that I spent 20 years as a security and systems technician: I know how to run a whole project, from the first brief to the last cable.',
+      ctaProjects: 'my projects',
       ctaContact: "let's talk",
       swipe: 'swipe to spin the cube',
       keys: ['spin', 'workspace', 'lids', 'drag', 'free rotation'],
@@ -119,7 +119,7 @@ export const ui = {
       stack: 'stack',
       soon: 'coming soon',
       shotAlt: 'Screenshot of the {name} website',
-      more: 'scroll to see all {n} projects',
+      more: 'scroll to see more projects',
     },
     about: {
       title: 'About me',

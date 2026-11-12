@@ -1,4 +1,4 @@
-import { SOCIAL } from '../data/site';
+import { SOCIAL } from '../data/profile';
 import { THEMES } from '../data/themes';
 import { applyTheme, currentTheme } from './theme';
 import { getEmail } from './email';

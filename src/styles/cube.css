@@ -356,6 +356,9 @@ html.cube .cube .tag {
 html.cube .cube .card__desc {
   position: absolute;
   inset: 0;
+  /* por encima del borde activo de la ventana (z-index 2); el click sigue en el enlace */
+  z-index: 3;
+  pointer-events: none;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -381,6 +384,10 @@ html.cube .cube .card__desc::before {
 html.cube .cube .card:hover .card__desc,
 html.cube .cube .card:focus-within .card__desc {
   opacity: 1;
+}
+/* la ventana no sube al pasar el ratón: su borde asomaría encima del de la descripción */
+html.cube .cube .card:hover .window {
+  transform: none;
 }
 
 /* ---------- cara 3: sobre mí ---------- */

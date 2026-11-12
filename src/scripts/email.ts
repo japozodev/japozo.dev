@@ -1,4 +1,4 @@
-import { SITE } from '../data/site';
+import { SITE } from '../data/profile';
 
 export const getEmail = () => atob(SITE.emailB64);
 
