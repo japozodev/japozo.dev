@@ -117,20 +117,22 @@ export const PROJECTS: Project[] = [
   },
 ];
 
-// Salida estilo `pacman -Q`
+// Salida estilo `pacman -Q`, con para qué se usa cada cosa en lugar de la versión
 export const STACK = [
-  { pkg: 'wordpress', ver: '6.x', icon: '' },
-  { pkg: 'elementor', ver: 'pro', icon: '' },
-  { pkg: 'astro', ver: '7.x', icon: '' },
-  { pkg: 'javascript', ver: 'es2025', icon: '' },
-  { pkg: 'html5', ver: 'living-std', icon: '' },
-  { pkg: 'css3', ver: 'nesting+grid', icon: '' },
-  { pkg: 'tailwind', ver: '4.x', icon: '' },
-  { pkg: 'bootstrap', ver: '5.x', icon: '' },
-  { pkg: 'plesk', ver: 'obsidian', icon: '' },
-  { pkg: 'docker', ver: 'compose', icon: '' },
-  { pkg: 'redis', ver: 'cache', icon: '' },
-  { pkg: 'cloudflare', ver: 'cdn+dns', icon: '' },
+  { pkg: 'wordpress', use: { es: 'webs de cliente', en: 'client sites' }, icon: '' },
+  { pkg: 'elementor', use: { es: 'diseño visual', en: 'visual design' }, icon: '' },
+  { pkg: 'astro', use: { es: 'webs rápidas', en: 'fast sites' }, icon: '' },
+  { pkg: 'laravel', use: { es: 'apps a medida', en: 'custom apps' }, icon: '' },
+  { pkg: 'livewire', use: { es: 'paneles admin', en: 'admin panels' }, icon: '' },
+  { pkg: 'javascript', use: { es: 'interacción', en: 'interactivity' }, icon: '' },
+  { pkg: 'html5', use: { es: 'maquetación', en: 'layout' }, icon: '' },
+  { pkg: 'css3', use: { es: 'estilo y 3D', en: 'style & 3D' }, icon: '' },
+  { pkg: 'tailwind', use: { es: 'estilo y prototipos', en: 'styling & prototypes' }, icon: '' },
+  { pkg: 'bootstrap', use: { es: 'estilos y diseño', en: 'styling & design' }, icon: '' },
+  { pkg: 'plesk', use: { es: 'servidores', en: 'servers' }, icon: '' },
+  { pkg: 'docker', use: { es: 'entornos dev', en: 'dev setups' }, icon: '' },
+  { pkg: 'redis', use: { es: 'caché', en: 'caching' }, icon: '' },
+  { pkg: 'cloudflare', use: { es: 'cdn y dns', en: 'cdn & dns' }, icon: '' },
 ];
 
 // Salida estilo `git log --oneline`

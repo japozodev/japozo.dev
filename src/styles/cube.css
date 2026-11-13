@@ -422,8 +422,11 @@ html.cube .cube .panel__cmd {
   margin-bottom: 0.5rem;
 }
 html.cube .cube .pkgs {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.15rem 1.75rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.15rem 2.5rem;
+}
+html.cube .cube .pkgs__ver {
+  white-space: nowrap;
 }
 
 /* ---------- cara 4: contacto ---------- */

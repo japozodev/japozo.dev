@@ -56,8 +56,8 @@ export const ui = {
     },
     about: {
       title: 'Sobre mí',
-      p1: 'Friki de la informática desde guaje: mi padre era electricista y yo crecí desmontando ordenadores. Pasé 20 años como técnico de seguridad y sistemas, los diez últimos de encargado en Viserco Seguridad.',
-      p2: 'Saqué un ciclo superior de desarrollo web en tres años, trabajando y siendo padre. Hice las prácticas en Kewo y me quedé. Cuido el detalle, procuro dar algo más de lo que se pide y siempre guardo la creatividad para la 404.',
+      p1: 'Apasionado de la electrónica y la informática desde guaje: mi padre era electricista y yo crecí desmontando ordenadores. Pasé 20 años como técnico de seguridad y sistemas, los diez últimos de encargado en Viserco Seguridad.',
+      p2: 'Saqué un ciclo superior de desarrollo web trabajando y siendo padre, todo simultáneamente. Hice las prácticas en Kewo y me quedé. Cuido el detalle, procuro dar algo más de lo que se pide y siempre guardo la creatividad para la 404.',
       stackTitle: 'lo que uso a diario',
       logTitle: 'historial',
       photoAlt: 'Foto de J. A. Pozo',
@@ -126,8 +126,8 @@ export const ui = {
     },
     about: {
       title: 'About me',
-      p1: 'A computer geek since I was a kid: my dad was an electrician and I grew up taking PCs apart. I spent 20 years as a security and systems technician, the last ten as a supervisor at Viserco Seguridad.',
-      p2: 'I earned a web development degree in three years while working full time and raising a kid. I interned at Kewo and stayed. I sweat the details, deliver a bit more than asked and save some creativity for the 404.',
+      p1: 'Passionate about electronics and computers since I was a kid: my dad was an electrician and I grew up taking PCs apart. I spent 20 years as a security and systems technician, the last ten as a supervisor at Viserco Seguridad.',
+      p2: 'I earned a web development degree while working full time and raising a kid, all at the same time. I interned at Kewo and stayed. I sweat the details, deliver a bit more than asked and save some creativity for the 404.',
       stackTitle: 'what I use daily',
       logTitle: 'history',
       photoAlt: 'Photo of J. A. Pozo',
