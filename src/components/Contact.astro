@@ -24,8 +24,8 @@ const short = (url: string) => url.replace(/^https:\/\/(www\.)?/, '').replace(/\
               <dt><span aria-hidden="true">{''}</span> {t.contact.email}</dt>
               <dd>
                 <a id="email-link" href="#contacto" class="email" data-label={t.contact.reveal}>[ {t.contact.reveal} ]</a>
-                <button type="button" id="copy-btn" class="copy" data-ok={t.contact.copied} data-err={t.contact.copyError}>
-                  <span aria-hidden="true">{''}</span> {t.contact.copy}
+                <button type="button" id="copy-btn" class="copy" data-ok={t.contact.copied} data-err={t.contact.copyError} data-done={t.contact.copyDone}>
+                  <span class="copy__icon" aria-hidden="true">{''}</span> <span class="copy__label">{t.contact.copy}</span>
                 </button>
               </dd>
             </div>
@@ -105,9 +105,23 @@ const short = (url: string) => url.replace(/^https:\/\/(www\.)?/, '').replace(/\
     font-size: 0.8rem;
     cursor: pointer;
   }
-  .copy:hover {
+  .copy:hover,
+  .copy.is-done {
     border-color: var(--accent);
     color: var(--accent);
+  }
+  .copy.is-done {
+    animation: copy-pop 0.3s ease-out;
+  }
+  @keyframes copy-pop {
+    40% {
+      transform: scale(1.08);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .copy.is-done {
+      animation: none;
+    }
   }
   .toast {
     margin: 0;
@@ -116,6 +130,15 @@ const short = (url: string) => url.replace(/^https:\/\/(www\.)?/, '').replace(/\
   }
   .toast:not(:empty) {
     margin-top: 1.25rem;
+  }
+  /* El acierto ya se ve en el botón: el aviso solo queda para lectores de pantalla */
+  .toast:not(.is-error) {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
   }
   .toast.is-error {
     color: var(--danger);
@@ -150,9 +173,27 @@ const short = (url: string) => url.replace(/^https:\/\/(www\.)?/, '').replace(/\
     }
   });
 
+  const icon = btn?.querySelector('.copy__icon');
+  const label = btn?.querySelector('.copy__label');
+  const idle = { icon: icon?.textContent ?? '', label: label?.textContent ?? '' };
+  let timer: number | undefined;
+
   btn?.addEventListener('click', async () => {
-    reveal();
     const ok = await copyEmail();
+    if (!ok) reveal(); // para poder seleccionarlo a mano
+    if (ok && icon && label) {
+      clearTimeout(timer);
+      btn.classList.remove('is-done');
+      void btn.offsetWidth; // reinicia la animación si se pulsa otra vez
+      btn.classList.add('is-done');
+      icon.textContent = '✓';
+      label.textContent = btn.dataset.done ?? '';
+      timer = window.setTimeout(() => {
+        btn.classList.remove('is-done');
+        icon.textContent = idle.icon;
+        label.textContent = idle.label;
+      }, 2000);
+    }
     if (!toast) return;
     toast.classList.toggle('is-error', !ok);
     toast.textContent = `${ok ? '✓' : '✗'} ${ok ? btn.dataset.ok : btn.dataset.err}`;
