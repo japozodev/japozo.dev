@@ -252,6 +252,14 @@ const num = String(index + 1).padStart(2, '0');
     transform: translate(3px, -3px);
   }
 
+  /* en táctil el :hover se queda pegado tras un toque */
+  @media (hover: none) {
+    .card:hover :global(.window),
+    .card:hover .card__media :global(img) {
+      transform: none;
+    }
+  }
+
   @keyframes load {
     to {
       transform: translateX(185%);

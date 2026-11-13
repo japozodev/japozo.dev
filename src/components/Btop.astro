@@ -125,6 +125,17 @@ const spark = (v: number) =>
     text-align: right;
     color: var(--warn);
   }
+  /* en móvil los procesos de broma solo ocupan sitio */
+  :global(html.swipe) .btop__head--proc,
+  :global(html.swipe) .btop__procs {
+    display: none;
+  }
+  @media (max-width: 760px) {
+    .btop__head--proc,
+    .btop__procs {
+      display: none;
+    }
+  }
 </style>
 
 <script>

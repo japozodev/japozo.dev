@@ -1,7 +1,7 @@
 ---
 import { Image } from 'astro:assets';
 import type { Lang } from '../data/site';
-import { STACK, TIMELINE } from '../data/site';
+import { GITGRAPH, STACK } from '../data/site';
 import { useTranslations } from '../i18n/ui';
 import profile from '../assets/profile.jpg';
 import SectionHeading from './SectionHeading.astro';
@@ -12,6 +12,18 @@ interface Props {
 
 const { lang } = Astro.props;
 const t = useTranslations(lang);
+
+// el mismo log con ramas que la base del cubo. En móvil los mensajes largos saltan
+// de línea: las ramas que siguen hacia abajo se alargan con '|' (g-cont) para que el
+// dibujo no se corte
+const graph = GITGRAPH.map((c, r) => {
+  const next = GITGRAPH[r + 1]?.graph ?? '';
+  const chars = [...c.graph].map((ch, i) => ({
+    ch,
+    cont: '*|'.includes(ch) && [i - 1, i, i + 1].some((j) => (next[j] ?? ' ') !== ' '),
+  }));
+  return { ...c, chars };
+});
 ---
 
 <section id="sobre-mi" class="section about">
@@ -46,15 +58,20 @@ const t = useTranslations(lang);
       </div>
 
       <div class="about__panel about__log reveal">
-        <p class="panel__cmd"><span class="c-accent">❯</span> git log --oneline <span class="c-muted"># {t.about.logTitle}</span></p>
+        <p class="panel__cmd"><span class="c-accent">❯</span> git log --graph --oneline --decorate <span class="c-muted"># {t.about.logTitle}</span></p>
         <ol class="log">
           {
-            TIMELINE.map((c) => (
-              <li>
-                <span class="log__graph" aria-hidden="true">*</span>
-                <span class="log__hash">{c.hash}</span>
+            graph.map((c) => (
+              <li aria-hidden={c.msg ? undefined : 'true'}>
+                <span class="log__graph" aria-hidden="true">
+                  {c.chars.map((g, i) => (
+                    <span class:list={[i === 0 ? 'g-main' : 'g-branch', { 'g-cont': g.cont }]}>{g.ch}</span>
+                  ))}
+                </span>
                 <span>
-                  {c.tag && <span class="log__tag">({c.tag})</span>} {c.msg[lang]}
+                  {c.hash && <span class="log__hash">{c.hash}</span>}
+                  {c.refs && <span class="log__tag"> ({c.refs})</span>}
+                  {c.msg && ` ${c.msg[lang]}`}
                 </span>
               </li>
             ))
@@ -161,19 +178,38 @@ const t = useTranslations(lang);
   }
 
   .log {
-    display: grid;
-    gap: 0.4rem;
     margin: 0;
     padding: 0;
     list-style: none;
+    /* interlineado justo para que las líneas de las ramas se toquen */
+    line-height: 1.35;
   }
   .log li {
     display: grid;
-    grid-template-columns: auto auto 1fr;
-    gap: 1ch;
+    /* el dibujo de cada fila ya trae su espacio final, como en git */
+    grid-template-columns: auto minmax(0, 1fr);
   }
   .log__graph {
-    color: var(--warn);
+    overflow: hidden;
+    white-space: pre;
+  }
+  .log__graph span {
+    display: inline-block;
+    position: relative;
+    vertical-align: top;
+  }
+  .g-main {
+    color: var(--accent);
+  }
+  .g-branch {
+    color: var(--magenta);
+  }
+  /* prolongación de la rama si el mensaje ocupa más de una línea (la recorta la fila) */
+  .g-cont::after {
+    content: '|\A|\A|\A|\A|';
+    position: absolute;
+    top: 100%;
+    left: 0;
   }
   .log__hash {
     color: var(--warn);
@@ -189,14 +225,6 @@ const t = useTranslations(lang);
     }
     .about__photo {
       max-width: 320px;
-    }
-  }
-  @media (max-width: 480px) {
-    .log li {
-      grid-template-columns: auto 1fr;
-    }
-    .log__graph {
-      display: none;
     }
   }
 </style>

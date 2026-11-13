@@ -1,7 +1,7 @@
 // Las secciones se comportan como workspaces de Hyprland. Hay tres modos:
 // - cubo (escritorio): caras de un cubo de verdad que gira como el de Compiz
 // - swipe (móvil y tablet): cada cara ocupa la pantalla y se pasa deslizando; las
-//   caras giran sobre su arista común según el scroll horizontal (ver swipeFaces)
+//   caras giran sobre su arista común al arrastrar el dedo (ver initSwipe)
 // - página vertical de siempre, con movimiento reducido
 // Teclas 1-4 como Super+N.
 
@@ -40,39 +40,127 @@ const cubeEl = () => document.getElementById('cube');
 const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v));
 const mod4 = (n: number) => ((n % 4) + 4) % 4;
 
-// Giro de las caras en modo swipe. p es la posición de cada cara respecto a la
-// pantalla (0 encajada, 1 a la derecha, -1 a la izquierda): pivota sobre la arista
-// que comparte con la vecina y se oscurece al ponerse de canto. La perspectiva va
-// dentro del transform y centrada en la pantalla, no en el scroller, porque Safari
-// la desplaza con el contenido.
+// Giro de las caras en modo swipe. Las caras van apiladas y `pos` dice qué cara se
+// ve (0-3, con decimales mientras se arrastra o se anima). p es la posición de cada
+// cara respecto a la pantalla (0 encajada, 1 a la derecha, -1 a la izquierda): pivota
+// sobre la arista que comparte con la vecina y una sombra la oscurece al ponerse de
+// canto (un filtro en toda la sección iba a tirones en móvil). La perspectiva va
+// dentro del transform y centrada en la pantalla porque Safari la desplaza.
 const PERSPECTIVE = 900;
+let pos = 0;
 let swipeRaf = 0;
+let swipeAnim = 0;
 const swipeFaces = () => {
   swipeRaf = 0;
-  const scroller = cubeEl();
-  if (!scroller) return;
-  const w = scroller.clientWidth || 1;
-  const pos = scroller.scrollLeft / w;
+  const w = cubeEl()?.clientWidth || 1;
   WORKSPACES.forEach((id, i) => {
     const s = document.getElementById(id);
     if (!s) return;
+    const shade = s.parentElement?.querySelector<HTMLElement>('.face__shade');
     if (!swipeOn()) {
-      s.style.transform = s.style.filter = s.style.visibility = '';
+      s.style.transform = s.style.visibility = '';
       return;
     }
     const p = clamp(i - pos, -1, 1);
     const edge = p > 0 ? -w / 2 : w / 2;
-    s.style.transform =
-      p === 0
-        ? ''
-        : `translateX(${-p * w}px) perspective(${PERSPECTIVE}px) translateX(${p * w + edge}px) rotateY(${p * 90}deg) translateX(${-edge}px)`;
-    s.style.filter = p === 0 ? '' : `brightness(${1 - 0.7 * Math.abs(p)})`;
-    s.style.visibility = Math.abs(p) >= 1 ? 'hidden' : '';
+    const tf = p === 0 ? '' : `perspective(${PERSPECTIVE}px) translateX(${p * w + edge}px) rotateY(${p * 90}deg) translateX(${-edge}px)`;
+    const vis = Math.abs(p) >= 1 ? 'hidden' : '';
+    s.style.transform = tf;
+    s.style.visibility = vis;
+    if (shade) {
+      shade.style.transform = tf;
+      shade.style.visibility = vis;
+      shade.style.opacity = (0.7 * Math.abs(p)).toFixed(3);
+    }
   });
 };
 const queueSwipeFaces = () => {
   if (!swipeRaf) swipeRaf = requestAnimationFrame(swipeFaces);
 };
+
+// lleva el giro hasta la cara `to` frenando al final
+function settle(to: number) {
+  cancelAnimationFrame(swipeAnim);
+  setCurrent(WORKSPACES[to]);
+  const from = pos;
+  const ms = clamp(Math.abs(to - from) * 420, 160, 700);
+  const t0 = performance.now();
+  const step = (now: number) => {
+    const t = Math.min(1, (now - t0) / ms);
+    pos = from + (to - from) * (1 - (1 - t) ** 3);
+    swipeFaces();
+    swipeAnim = t < 1 ? requestAnimationFrame(step) : 0;
+  };
+  swipeAnim = requestAnimationFrame(step);
+}
+
+// deslizar con el dedo. El navegador solo se queda el desplazamiento vertical
+// (touch-action: pan-y en swipe.css), así que cada gesto es o scroll de la cara o
+// giro, nunca las dos cosas. Un giro no cuenta como toque: no abre la tarjeta que
+// hubiera debajo del dedo.
+function initSwipe() {
+  const scroller = cubeEl();
+  if (!scroller) return;
+  scroller.querySelectorAll('.face:not(.face--lid)').forEach((f) => {
+    const shade = document.createElement('div');
+    shade.className = 'face__shade';
+    f.append(shade);
+  });
+  let drag: { id: number; x: number; y: number; from: number; lastX: number; lastT: number; v: number; on: boolean } | null = null;
+  let swallow = false;
+
+  scroller.addEventListener('pointerdown', (e) => {
+    if (!swipeOn() || e.pointerType === 'mouse' || !e.isPrimary) return;
+    // tocar mientras gira lo para donde esté y ese toque no pulsa nada
+    swallow = !!swipeAnim;
+    cancelAnimationFrame(swipeAnim);
+    swipeAnim = 0;
+    drag = { id: e.pointerId, x: e.clientX, y: e.clientY, from: pos, lastX: e.clientX, lastT: e.timeStamp, v: 0, on: false };
+  });
+  addEventListener('pointermove', (e) => {
+    if (!drag || e.pointerId !== drag.id) return;
+    if (!drag.on) {
+      const dx = e.clientX - drag.x;
+      if (Math.abs(dx) < 8 || Math.abs(dx) < Math.abs(e.clientY - drag.y)) return;
+      drag.on = true;
+      drag.x = drag.lastX = e.clientX;
+      drag.lastT = e.timeStamp;
+      html.classList.add('swiping');
+      return;
+    }
+    const dt = e.timeStamp - drag.lastT;
+    if (dt > 0) drag.v = 0.7 * ((e.clientX - drag.lastX) / dt) + 0.3 * drag.v;
+    drag.lastX = e.clientX;
+    drag.lastT = e.timeStamp;
+    // en las caras de los extremos el giro se resiste
+    const p = drag.from - (e.clientX - drag.x) / (scroller.clientWidth || 1);
+    pos = p < 0 ? p / 3 : p > 3 ? 3 + (p - 3) / 3 : p;
+    queueSwipeFaces();
+  });
+  const end = (e: PointerEvent) => {
+    if (!drag || e.pointerId !== drag.id) return;
+    const d = drag;
+    drag = null;
+    html.classList.remove('swiping');
+    if (d.on) swallow = true;
+    // un gesto rápido basta para pasar de cara aunque el dedo haya recorrido poco
+    const fling = e.type === 'pointerup' && d.on && Math.abs(d.v) > 0.3 && e.timeStamp - d.lastT < 120;
+    const to = fling ? (d.v < 0 ? Math.floor(pos) + 1 : Math.ceil(pos) - 1) : Math.round(pos);
+    if (d.on || pos !== Math.round(pos)) settle(clamp(to, 0, 3));
+    setTimeout(() => (swallow = false), 60);
+  };
+  addEventListener('pointerup', end);
+  addEventListener('pointercancel', end);
+  scroller.addEventListener(
+    'click',
+    (e) => {
+      if (!swallow) return;
+      e.preventDefault();
+      e.stopPropagation();
+    },
+    true,
+  );
+}
 
 const render = () => {
   const cube = cubeEl();
@@ -143,11 +231,15 @@ function initWheel() {
   document.getElementById('main')?.addEventListener(
     'wheel',
     (e) => {
-      if (!cubeOn() || e.ctrlKey || Math.abs(e.deltaY) < Math.abs(e.deltaX)) return;
+      // en el cubo manda la rueda vertical; en swipe, el gesto horizontal del trackpad
+      const swipe = swipeOn();
+      if (!cubeOn() && !swipe) return;
+      const delta = swipe ? e.deltaX : e.deltaY;
+      if (e.ctrlKey || Math.abs(delta) < Math.abs(swipe ? e.deltaY : e.deltaX)) return;
       if ((e.target as Element).closest('.dock')) return;
       // una lista con scroll dentro de la cara (proyectos) se desplaza primero; el
       // cubo solo gira cuando ya está en el tope
-      const list = (e.target as Element).closest<HTMLElement>('.projects');
+      const list = swipe ? null : (e.target as Element).closest<HTMLElement>('.projects');
       if (list && list.scrollHeight > list.clientHeight + 1) {
         const atEdge = e.deltaY > 0 ? list.scrollTop + list.clientHeight >= list.scrollHeight - 2 : list.scrollTop <= 0;
         if (!atEdge) return void (last = performance.now());
@@ -156,17 +248,18 @@ function initWheel() {
       const now = performance.now();
       const fresh = now - last > 220; // la rueda llevaba un rato quieta: gesto nuevo
       last = now;
-      if (raf) return void (armed = false);
+      if (raf || swipeAnim) return void (armed = false);
       if (fresh) {
         armed = true;
         acc = 0;
       }
       if (!armed) return;
-      acc += e.deltaY;
+      acc += delta;
       if (Math.abs(acc) < 60) return;
       armed = false;
       const i = WORKSPACES.indexOf(current);
-      goToSection(lid ? current : WORKSPACES[mod4(i + (acc > 0 ? 1 : -1))]);
+      const next = i + (acc > 0 ? 1 : -1);
+      goToSection(lid ? current : WORKSPACES[swipe ? clamp(next, 0, 3) : mod4(next)]);
       acc = 0;
     },
     { passive: false },
@@ -263,8 +356,7 @@ export function goToSection(id: string) {
   }
 
   if (swipeOn() && to >= 0) {
-    const scroller = cubeEl();
-    scroller?.scrollTo({ left: to * scroller.clientWidth, behavior: 'smooth' });
+    settle(to);
     return;
   }
 
@@ -303,28 +395,20 @@ export function initWorkspaces() {
     const home = document.querySelector(cubeMode ? '#dock' : '.hero__grid');
     if (desktop && home && desktop.parentElement !== home) home.append(desktop);
     syncFaces();
-    if (swipeMode && cube) cube.scrollLeft = WORKSPACES.indexOf(current) * cube.clientWidth;
+    cancelAnimationFrame(swipeAnim);
+    swipeAnim = 0;
+    pos = WORKSPACES.indexOf(current);
     swipeFaces();
     if (was && !cubeMode && !swipeMode) document.getElementById(current)?.scrollIntoView({ behavior: 'instant' as ScrollBehavior });
   };
   mq.addEventListener('change', applyMode);
   motion.addEventListener('change', applyMode);
-  // en modo swipe el workspace activo es la cara que queda encajada
-  cubeEl()?.addEventListener(
-    'scroll',
-    (e) => {
-      const el = e.currentTarget as HTMLElement;
-      if (!swipeOn()) return;
-      setCurrent(WORKSPACES[clamp(Math.round(el.scrollLeft / el.clientWidth), 0, 3)]);
-      queueSwipeFaces();
-    },
-    { passive: true },
-  );
   addEventListener('resize', queueSwipeFaces, { passive: true });
   applyMode();
   initWheel();
   initDrag();
   initTilt();
+  initSwipe();
 
   // sección visible (solo en modo scroll; en el cubo manda el giro)
   const io = new IntersectionObserver(

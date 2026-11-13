@@ -1,10 +1,11 @@
 /* ---------- CUBO EN MÓVIL Y TABLET (deslizar) ---------- */
 /* Donde no cabe el cubo de escritorio, cada sección ocupa la pantalla entera y se
    pasa de una a otra deslizando el dedo: las caras giran sobre su arista común como
-   un cubo (la transición de las stories). El giro lo calcula workspaces.ts a partir
-   del scroll horizontal: las animaciones ligadas al scroll de CSS no van en Safari
-   de iPhone y ahí solo quedaba un deslizamiento plano. La clase .swipe la pone el
-   script inline de Base.astro; con movimiento reducido se usa la página vertical. */
+   un cubo (la transición de las stories). Las caras van apiladas y el giro lo hace
+   workspaces.ts siguiendo al dedo: con el scroll horizontal nativo el gesto peleaba
+   con el scroll vertical de cada cara y con los toques en las tarjetas. La clase
+   .swipe la pone el script inline de Base.astro; con movimiento reducido se usa la
+   página vertical. */
 html.swipe {
   scroll-behavior: auto;
   --header-h: calc(3.25rem + 1px);
@@ -33,26 +34,40 @@ html.swipe .cube-tilt {
   display: contents;
 }
 html.swipe .cube {
-  display: flex;
+  position: relative;
   height: 100%;
-  overflow-x: auto;
-  overflow-y: hidden;
-  scroll-snap-type: x mandatory;
-  overscroll-behavior-x: contain;
-  scrollbar-width: none;
+  overflow: hidden;
 }
-html.swipe .cube::-webkit-scrollbar {
-  display: none;
+/* el navegador solo se encarga del scroll vertical de cada cara; el gesto
+   horizontal es el giro. Va en todo lo de dentro porque cada contenedor con
+   scroll (la terminal, por ejemplo) vuelve a empezar la cuenta */
+html.swipe .cube,
+html.swipe .cube * {
+  touch-action: pan-y pinch-zoom;
 }
-/* .face es el hueco fijo (imán del scroll); la sección gira dentro.
-   El giro no puede ir en el propio hueco: movería los puntos de imán */
+html.swipe.swiping .cube {
+  user-select: none;
+  -webkit-user-select: none;
+}
+/* .face es el hueco fijo; la sección gira dentro */
 html.swipe .face {
   display: block;
-  flex: 0 0 100%;
-  min-width: 0;
-  height: 100%;
-  scroll-snap-align: start;
-  scroll-snap-stop: always;
+  position: absolute;
+  inset: 0;
+}
+/* oscurece la cara al ponerse de canto (gira con ella) */
+.face__shade {
+  display: none;
+}
+html.swipe .face__shade {
+  display: block;
+  position: absolute;
+  inset: 0;
+  background: #000;
+  opacity: 0;
+  pointer-events: none;
+  backface-visibility: hidden;
+  will-change: transform, opacity;
 }
 html.swipe .face--lid {
   display: none;
