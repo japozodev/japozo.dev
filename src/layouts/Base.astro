@@ -42,9 +42,10 @@ const jsonLd = {
     {noindex && <meta name="robots" content="noindex" />}
     <meta name="description" content={t.meta.description} />
     <meta name="author" content={SITE.name} />
-    <link rel="canonical" href={canonical} />
-    {LANGS.map((l) => <link rel="alternate" hreflang={l} href={new URL(pathFor(l), Astro.site)} />)}
-    <link rel="alternate" hreflang="x-default" href={new URL('/', Astro.site)} />
+    {/* La 404 no es una página canónica: sin canonical ni alternativas de idioma */}
+    {!noindex && <link rel="canonical" href={canonical} />}
+    {!noindex && LANGS.map((l) => <link rel="alternate" hreflang={l} href={new URL(pathFor(l), Astro.site)} />)}
+    {!noindex && <link rel="alternate" hreflang="x-default" href={new URL('/', Astro.site)} />}
 
     <meta property="og:type" content="website" />
     <meta property="og:url" content={canonical} />

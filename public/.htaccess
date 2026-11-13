@@ -1,0 +1,23 @@
+# japozo.dev (Plesk: nginx delante de Apache)
+
+ErrorDocument 404 /404.html
+
+RewriteEngine On
+
+# www -> sin www
+RewriteCond %{HTTP_HOST} ^www\.japozo\.dev$ [NC]
+RewriteRule ^ https://japozo.dev%{REQUEST_URI} [R=301,L]
+
+# URL de la web antigua
+RewriteRule ^safeMode/?$ / [R=301,L]
+
+# Caché: los ficheros de _astro llevan hash en el nombre y no cambian nunca;
+# el HTML se revalida siempre para que se vea lo último publicado
+<IfModule mod_headers.c>
+  <FilesMatch "\.html$">
+    Header set Cache-Control "no-cache"
+  </FilesMatch>
+  <If "%{REQUEST_URI} =~ m#^/_astro/#">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </If>
+</IfModule>
