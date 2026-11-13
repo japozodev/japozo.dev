@@ -1,10 +1,10 @@
 /* ---------- CUBO EN MÓVIL Y TABLET (deslizar) ---------- */
 /* Donde no cabe el cubo de escritorio, cada sección ocupa la pantalla entera y se
    pasa de una a otra deslizando el dedo: las caras giran sobre su arista común como
-   un cubo (la transición de las stories). El giro lo mueve el propio scroll
-   horizontal con animaciones ligadas al scroll, sin JS; donde no hay soporte queda
-   un deslizamiento normal con imán. La clase .swipe la pone el script inline de
-   Base.astro; con movimiento reducido se usa la página vertical de siempre. */
+   un cubo (la transición de las stories). El giro lo calcula workspaces.ts a partir
+   del scroll horizontal: las animaciones ligadas al scroll de CSS no van en Safari
+   de iPhone y ahí solo quedaba un deslizamiento plano. La clase .swipe la pone el
+   script inline de Base.astro; con movimiento reducido se usa la página vertical. */
 html.swipe {
   scroll-behavior: auto;
   --header-h: calc(3.25rem + 1px);
@@ -40,12 +40,11 @@ html.swipe .cube {
   scroll-snap-type: x mandatory;
   overscroll-behavior-x: contain;
   scrollbar-width: none;
-  perspective: 1100px;
 }
 html.swipe .cube::-webkit-scrollbar {
   display: none;
 }
-/* .face es el hueco fijo (imán del scroll y línea de tiempo); la sección gira dentro.
+/* .face es el hueco fijo (imán del scroll); la sección gira dentro.
    El giro no puede ir en el propio hueco: movería los puntos de imán */
 html.swipe .face {
   display: block;
@@ -54,9 +53,6 @@ html.swipe .face {
   height: 100%;
   scroll-snap-align: start;
   scroll-snap-stop: always;
-  view-timeline: --face inline;
-  /* deja pasar la perspectiva del cubo hasta la sección */
-  transform-style: preserve-3d;
 }
 html.swipe .face--lid {
   display: none;
@@ -71,39 +67,8 @@ html.swipe .face > section {
   background-color: color-mix(in srgb, var(--bg) 86%, transparent);
   border-inline: 1px solid color-mix(in srgb, var(--accent) 55%, var(--border));
   outline: none;
-}
-
-@supports (animation-timeline: view()) {
-  html.swipe .face > section {
-    animation: swipe-face linear both;
-    animation-timeline: --face;
-  }
-  /* cada cara pivota sobre la arista que comparte con la vecina y se oscurece al
-     ponerse de canto, como una cara de cubo que deja de recibir luz */
-  @keyframes swipe-face {
-    /* visibility: con perspectiva una cara de canto en el borde aún asoma; fuera de
-       la pantalla se oculta del todo */
-    entry 0% {
-      transform: translateX(-50%) rotateY(90deg) translateX(50%);
-      filter: brightness(0.3);
-      visibility: hidden;
-    }
-    entry 100% {
-      transform: none;
-      filter: none;
-      visibility: visible;
-    }
-    exit 0% {
-      transform: none;
-      filter: none;
-      visibility: visible;
-    }
-    exit 100% {
-      transform: translateX(50%) rotateY(-90deg) translateX(-50%);
-      filter: brightness(0.3);
-      visibility: hidden;
-    }
-  }
+  backface-visibility: hidden;
+  will-change: transform;
 }
 
 html.swipe .face > .section {

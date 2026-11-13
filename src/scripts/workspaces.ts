@@ -1,7 +1,7 @@
 // Las secciones se comportan como workspaces de Hyprland. Hay tres modos:
 // - cubo (escritorio): caras de un cubo de verdad que gira como el de Compiz
-// - swipe (móvil y tablet): cada cara ocupa la pantalla y se pasa deslizando; el
-//   giro lo hace el CSS ligado al scroll horizontal (ver styles/swipe.css)
+// - swipe (móvil y tablet): cada cara ocupa la pantalla y se pasa deslizando; las
+//   caras giran sobre su arista común según el scroll horizontal (ver swipeFaces)
 // - página vertical de siempre, con movimiento reducido
 // Teclas 1-4 como Super+N.
 
@@ -39,6 +39,40 @@ const swipeOn = () => html.classList.contains('swipe');
 const cubeEl = () => document.getElementById('cube');
 const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v));
 const mod4 = (n: number) => ((n % 4) + 4) % 4;
+
+// Giro de las caras en modo swipe. p es la posición de cada cara respecto a la
+// pantalla (0 encajada, 1 a la derecha, -1 a la izquierda): pivota sobre la arista
+// que comparte con la vecina y se oscurece al ponerse de canto. La perspectiva va
+// dentro del transform y centrada en la pantalla, no en el scroller, porque Safari
+// la desplaza con el contenido.
+const PERSPECTIVE = 900;
+let swipeRaf = 0;
+const swipeFaces = () => {
+  swipeRaf = 0;
+  const scroller = cubeEl();
+  if (!scroller) return;
+  const w = scroller.clientWidth || 1;
+  const pos = scroller.scrollLeft / w;
+  WORKSPACES.forEach((id, i) => {
+    const s = document.getElementById(id);
+    if (!s) return;
+    if (!swipeOn()) {
+      s.style.transform = s.style.filter = s.style.visibility = '';
+      return;
+    }
+    const p = clamp(i - pos, -1, 1);
+    const edge = p > 0 ? -w / 2 : w / 2;
+    s.style.transform =
+      p === 0
+        ? ''
+        : `translateX(${-p * w}px) perspective(${PERSPECTIVE}px) translateX(${p * w + edge}px) rotateY(${p * 90}deg) translateX(${-edge}px)`;
+    s.style.filter = p === 0 ? '' : `brightness(${1 - 0.7 * Math.abs(p)})`;
+    s.style.visibility = Math.abs(p) >= 1 ? 'hidden' : '';
+  });
+};
+const queueSwipeFaces = () => {
+  if (!swipeRaf) swipeRaf = requestAnimationFrame(swipeFaces);
+};
 
 const render = () => {
   const cube = cubeEl();
@@ -270,6 +304,7 @@ export function initWorkspaces() {
     if (desktop && home && desktop.parentElement !== home) home.append(desktop);
     syncFaces();
     if (swipeMode && cube) cube.scrollLeft = WORKSPACES.indexOf(current) * cube.clientWidth;
+    swipeFaces();
     if (was && !cubeMode && !swipeMode) document.getElementById(current)?.scrollIntoView({ behavior: 'instant' as ScrollBehavior });
   };
   mq.addEventListener('change', applyMode);
@@ -279,10 +314,13 @@ export function initWorkspaces() {
     'scroll',
     (e) => {
       const el = e.currentTarget as HTMLElement;
-      if (swipeOn()) setCurrent(WORKSPACES[clamp(Math.round(el.scrollLeft / el.clientWidth), 0, 3)]);
+      if (!swipeOn()) return;
+      setCurrent(WORKSPACES[clamp(Math.round(el.scrollLeft / el.clientWidth), 0, 3)]);
+      queueSwipeFaces();
     },
     { passive: true },
   );
+  addEventListener('resize', queueSwipeFaces, { passive: true });
   applyMode();
   initWheel();
   initDrag();

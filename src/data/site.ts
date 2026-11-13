@@ -103,18 +103,6 @@ export const PROJECTS: Project[] = [
     role: { es: 'Idea, diseño y desarrollo', en: 'Concept, design and development' },
     stack: ['Astro', 'CSS 3D', 'JavaScript'],
   },
-  {
-    slug: 'proyecto-06',
-    name: 'proyecto_06',
-    year: '2026',
-    status: 'queued',
-    desc: {
-      es: 'Hueco reservado para el próximo proyecto. Compilando...',
-      en: 'Slot reserved for the next project. Compiling...',
-    },
-    role: { es: 'Por definir', en: 'TBD' },
-    stack: ['???'],
-  },
 ];
 
 // Salida estilo `pacman -Q`, con para qué se usa cada cosa en lugar de la versión
