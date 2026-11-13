@@ -49,11 +49,17 @@ html.swipe.swiping .cube {
   user-select: none;
   -webkit-user-select: none;
 }
-/* .face es el hueco fijo; la sección gira dentro */
+/* .face es el hueco fijo; la sección gira dentro. Los huecos van apilados y el
+   de encima taparía la cara visible: solo reciben el dedo las secciones (las que
+   no se ven van con visibility: hidden y lo dejan pasar) */
 html.swipe .face {
   display: block;
   position: absolute;
   inset: 0;
+  pointer-events: none;
+}
+html.swipe .face > section {
+  pointer-events: auto;
 }
 /* oscurece la cara al ponerse de canto (gira con ella) */
 .face__shade {
