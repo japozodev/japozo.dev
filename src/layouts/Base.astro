@@ -75,7 +75,6 @@ const jsonLd = {
       }
       let theme = null;
       try { theme = localStorage.getItem(THEME_KEY); } catch {}
-      if (!theme && matchMedia('(prefers-color-scheme: light)').matches) theme = 'latte';
       if (theme) root.dataset.theme = theme;
     </script>
   </head>
