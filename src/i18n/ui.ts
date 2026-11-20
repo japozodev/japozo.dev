@@ -7,7 +7,7 @@ export const ui = {
     meta: {
       title: 'Pozo · Desarrollador web en Gijón',
       description:
-        'Portfolio de J. A. Pozo, desarrollador web en Gijón. Webs en WordPress y Astro llevadas de la idea al dominio en producción, con 20 años de sistemas a la espalda.',
+        'Portfolio de J. A. Pozo, desarrollador web en Gijón. Desarrollo webs de la idea al dominio en producción, con 20 años de sistemas a la espalda.',
     },
     nav: { home: 'inicio', projects: 'proyectos', about: 'sobre-mí', contact: 'contacto', label: 'Workspaces' },
     skip: 'Saltar al contenido',
@@ -79,7 +79,7 @@ export const ui = {
     meta: {
       title: 'Pozo · Web Developer in Gijón, Spain',
       description:
-        'Portfolio of J. A. Pozo, web developer based in Gijón, Spain. WordPress and Astro sites taken from idea to live domain, backed by 20 years in systems.',
+        'Portfolio of J. A. Pozo, web developer based in Gijón, Spain. I build websites from idea to live domain, backed by 20 years in systems.',
     },
     nav: { home: 'home', projects: 'projects', about: 'about', contact: 'contact', label: 'Workspaces' },
     skip: 'Skip to content',

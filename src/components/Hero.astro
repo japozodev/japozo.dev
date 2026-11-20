@@ -14,7 +14,8 @@ const t = useTranslations(lang);
 <section id="inicio" class="hero">
   <div class="hero__bg" aria-hidden="true"></div>
   <div class="container hero__grid">
-    <div class="hero__copy">
+    <!-- data-nosnippet: que Google tire de la meta description y no de este texto (el rotador salía pegado) -->
+    <div class="hero__copy" data-nosnippet>
       <p class="hero__kicker"><span class="dot"></span>{t.hero.kicker}</p>
       <h1 class="hero__title">
         <span class="hero__hello">{t.hero.hello}</span>
