@@ -6,6 +6,7 @@ import '../styles/swipe.css';
 import type { Lang } from '../data/site';
 import { SITE, SOCIAL } from '../data/site';
 import { DEFAULT_THEME, THEME_KEY } from '../data/themes';
+import { LOGO } from '../data/logo';
 import { LANGS, pathFor, useTranslations } from '../i18n/ui';
 
 interface Props {
@@ -21,6 +22,32 @@ const canonical = new URL(pathFor(lang), Astro.site);
 // imagen social de 1200x630, generada en src/lib/og.ts
 const ogUrl = new URL(lang === 'es' ? '/og.png' : '/en/og.png', Astro.site);
 
+// Easter egg para quien abra el código (F12 / ver código fuente). Va con set:html
+// porque dentro de un comentario literal no se interpolan variables.
+const sourceNote = {
+  es: [
+    '¡Qué pasa, curioso! ¿Qué buscas en mi código?',
+    'Si has llegado hasta aquí, ya tenemos algo en común: a mí también',
+    'me gusta mirar cómo están hechas las cosas por dentro.',
+    '',
+    `El código entero está en ${SOCIAL.github}/japozo.dev`,
+    'Y si te gusta lo que ves, hablamos: https://japozo.dev/#contacto',
+    '',
+    'Pista: en la terminal de la portada, escribe help.',
+  ],
+  en: [
+    "What's up, curious one! Looking for something in my code?",
+    'If you made it this far, we already have something in common:',
+    'I also like to see how things are made on the inside.',
+    '',
+    `The whole source is at ${SOCIAL.github}/japozo.dev`,
+    "And if you like what you see, let's talk: https://japozo.dev/en/#contacto",
+    '',
+    'Hint: type help in the terminal on the home page.',
+  ],
+}[lang];
+const sourceComment = `<!--\n\n${[...LOGO.split('\n'), '', ...sourceNote].map((l) => `  ${l}`.trimEnd()).join('\n')}\n\n-->\n`;
+
 const jsonLd = {
   '@context': 'https://schema.org',
   '@type': 'Person',
@@ -35,6 +62,7 @@ const jsonLd = {
 
 <!doctype html>
 <html lang={lang} data-theme={DEFAULT_THEME}>
+  <Fragment set:html={sourceComment} />
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
