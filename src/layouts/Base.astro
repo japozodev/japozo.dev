@@ -109,5 +109,10 @@ const jsonLd = {
   <body>
     <a class="skip-link" href="#main">{t.skip}</a>
     <slot />
+    <script>
+      import { consoleHello } from '../scripts/console';
+
+      consoleHello();
+    </script>
   </body>
 </html>
